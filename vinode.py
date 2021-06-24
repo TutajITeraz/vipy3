@@ -294,9 +294,20 @@ class ViNode:
             elif type(self.params[p]) is str:
                 add_input_text(p + "##" + self.name + "#input", width=160, default_value=self.params[p],
                                callback=self.updateParam, callback_data=p)
-            elif type(self.params[p]) is bool:
+            elif type(self.params[p]) is list:
                 add_checkbox(p + "##" + self.name + "#input", default_value=self.params[p], callback=self.updateParam,
                              callback_data=p)
+                if type(self.params[p][0]) is float:
+                    add_slider_float(p + "##" + self.name + "#input",default_value=self.params[p][0],
+                                     min_value=self.params[p][0], max_value=self.params[p][0],callback=self.updateParam,
+                                     callback_data=p)
+                elif type(self.params[p][0]) is int:
+                    add_slider_int(p + "##" + self.name + "#input",default_value=self.params[p][0],
+                                   min_value=self.params[p][0], max_value=self.params[p][0],callback=self.updateParam,
+                                   callback_data=p)
+            elif type(self.params[p]) is dict:
+                add_combo(p + "##" + self.name + "#input",default_value=self.params[p]['selected'], items=self.params[p]['list'],
+                          callback=self.updateParam, callback_data=p)
 
             end()  # node_attribute
 

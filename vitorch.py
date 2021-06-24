@@ -10,10 +10,7 @@ import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 
-
 from os.path import expanduser
-
-DEFAULT_FOLDER = expanduser('~/')
 
 import collections
 try:
@@ -40,7 +37,7 @@ class ViDatasetsMNIST(ViNode):
         self.params = {'root': '~/pydata', 'train': True, 'download': True}
 
     def execFunction(self):
-        return datasets.MNIST(root=self.params['root'], train=self.params['train'], download=self.params['download'],
+        return datasets.MNIST(root=expanduser(self.params['root']), train=self.params['train'], download=self.params['download'],
                               transform=self.inputCache['transform'])
 
     def initFunction(self):
@@ -597,13 +594,13 @@ class ViSaveModel(ViNode):
         self.outputFunctions = {'getAndSaveModel': self.execFunction}
         self.playDefaultOut = 'getAndSaveModel'
         self.addConnection('model', None, None)
-        self.params={'path': DEFAULT_FOLDER + '/pydata/Model.pytorch'}
+        self.params={'path': '~/pydata/Model.pytorch'}
 
     def initFunction(self):
         pass
 
     def execFunction(self):
-        torch.save(self.inputCache['model'], self.params['path'])
+        torch.save(self.inputCache['model'], expanduser(self.params['path']))
 
         return self.inputCache['model']
 
@@ -615,13 +612,13 @@ class ViLoadModel(ViNode):
         super().__init__(name)
         self.outputFunctions = {'loadModel': self.execFunction}
         self.playDefaultOut = 'loadModel'
-        self.params = {'path': DEFAULT_FOLDER + '/pydata/Model.pytorch'}
+        self.params = {'path': '~/pydata/Model.pytorch'}
 
     def initFunction(self):
         pass
 
     def execFunction(self):
-        self.model = torch.load(self.params['path'])
+        self.model = torch.load(expanduser(self.params['path']))
 
         return self.model
 
