@@ -294,20 +294,25 @@ class ViNode:
             elif type(self.params[p]) is str:
                 add_input_text(p + "##" + self.name + "#input", width=160, default_value=self.params[p],
                                callback=self.updateParam, callback_data=p)
-            elif type(self.params[p]) is list:
+            elif type(self.params[p]) is bool:
                 add_checkbox(p + "##" + self.name + "#input", default_value=self.params[p], callback=self.updateParam,
                              callback_data=p)
+            elif type(self.params[p]) is list:
                 if type(self.params[p][0]) is float:
                     add_slider_float(p + "##" + self.name + "#input",default_value=self.params[p][0],
-                                     min_value=self.params[p][0], max_value=self.params[p][0],callback=self.updateParam,
-                                     callback_data=p)
+                                     min_value=self.params[p][0], max_value=self.params[p][1], width=160,
+                                     callback=self.updateParam,callback_data=p)
                 elif type(self.params[p][0]) is int:
                     add_slider_int(p + "##" + self.name + "#input",default_value=self.params[p][0],
-                                   min_value=self.params[p][0], max_value=self.params[p][0],callback=self.updateParam,
-                                   callback_data=p)
+                                   min_value=self.params[p][0], max_value=self.params[p][1], width=160,
+                                   callback=self.updateParam,callback_data=p)
+                
+                self.params[p] = self.params[p][0]
             elif type(self.params[p]) is dict:
                 add_combo(p + "##" + self.name + "#input",default_value=self.params[p]['selected'], items=self.params[p]['list'],
-                          callback=self.updateParam, callback_data=p)
+                          callback=self.updateParam, callback_data=p, width=160,)
+
+                self.params[p] = self.params[p]['selected']
 
             end()  # node_attribute
 
