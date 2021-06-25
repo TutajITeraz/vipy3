@@ -17,10 +17,20 @@ class ViValueSlider(ViNode):
     def __init__(self, name):
         super().__init__(name)
 
-        self.params = {'value': [0,10]}
+        self.params = {'value': [0,1,10]}
 
     def execFunction(self):
-        return self.params['value']
+        return self.params['value'][1]
+
+class ViValueSliderFloat(ViNode):
+    className = 'ViValueSliderFloat'
+    def __init__(self, name):
+        super().__init__(name)
+
+        self.params = {'value': [0.0,0.5,1.0]}
+
+    def execFunction(self):
+        return self.params['value'][1]
 
 class ViValueSelect(ViNode):
     className = 'ViValueSelect'
@@ -30,7 +40,7 @@ class ViValueSelect(ViNode):
         self.params = {'value': {'selected': 'jeden', 'list': ['zero','jeden','dwa']}}
 
     def execFunction(self):
-        return self.params['value']
+        return self.params['value']['selected']
 
 class ViAdd(ViNode):
     className = 'ViAdd'
@@ -71,4 +81,5 @@ VINODES.append(ViFor)
 VINODES.append(ViAdd)
 VINODES.append(ViValue)
 VINODES.append(ViValueSlider)
+VINODES.append(ViValueSliderFloat)
 VINODES.append(ViValueSelect)

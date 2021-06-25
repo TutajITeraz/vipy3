@@ -266,7 +266,20 @@ class ViNode:
         # print("updateParam sender:"+ sender)
         value = get_value(sender)
         # print("updateParam value:"+ str(value))
-        self.params[data] = value
+
+        #print(str( type(self.params[data])))
+        print('updateParam before change: '+ str(self.params[data]))
+
+        if type(self.params[data]) is dict:
+            self.params[data]['selected'] = value
+            print('is dict')
+        elif type(self.params[data]) is list:
+            self.params[data][1] = value
+            print('is list')
+        else:
+            self.params[data] = value
+
+        print('updateParam after change: ' + str(self.params[data]))
 
     def addToNodeEditor(self, nodeEditor, nodeParams=None):
         print(str(nodeEditor))
@@ -299,20 +312,20 @@ class ViNode:
                              callback_data=p)
             elif type(self.params[p]) is list:
                 if type(self.params[p][0]) is float:
-                    add_slider_float(p + "##" + self.name + "#input",default_value=self.params[p][0],
-                                     min_value=self.params[p][0], max_value=self.params[p][1], width=160,
+                    add_slider_float(p + "##" + self.name + "#input",default_value=self.params[p][1],
+                                     min_value=self.params[p][0], max_value=self.params[p][2], width=160,
                                      callback=self.updateParam,callback_data=p)
                 elif type(self.params[p][0]) is int:
-                    add_slider_int(p + "##" + self.name + "#input",default_value=self.params[p][0],
-                                   min_value=self.params[p][0], max_value=self.params[p][1], width=160,
+                    add_slider_int(p + "##" + self.name + "#input",default_value=self.params[p][1],
+                                   min_value=self.params[p][0], max_value=self.params[p][2], width=160,
                                    callback=self.updateParam,callback_data=p)
                 
-                self.params[p] = self.params[p][0]
+                #self.params[p] = self.params[p][0]
             elif type(self.params[p]) is dict:
                 add_combo(p + "##" + self.name + "#input",default_value=self.params[p]['selected'], items=self.params[p]['list'],
                           callback=self.updateParam, callback_data=p, width=160,)
 
-                self.params[p] = self.params[p]['selected']
+                #self.params[p] = self.params[p]['selected']
 
             end()  # node_attribute
 
