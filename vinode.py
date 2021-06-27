@@ -376,3 +376,18 @@ class ViNode:
     def linkCallback(self, nodeFrom, nodeFromAtrName, attrName):
         print(self.name + " has new connection from atr:" + nodeFromAtrName + " to attr: " + attrName)
         self.addConnection(attrName, nodeFrom, nodeFromAtrName)
+
+    def getParamValue(self, paramName):
+        value = None
+
+        if paramName in self.params:
+            value = self.params[paramName]
+        else:
+            return value
+
+        if type(value) is dict:
+            return value['selected']
+        elif type(value) is list:
+            return value[1]
+        else:
+            return value

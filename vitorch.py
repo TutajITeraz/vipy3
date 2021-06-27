@@ -18,27 +18,45 @@ try:
 except ImportError:
     OrderedDict = dict
 
-class ViTransformToTensor(ViNode):
-    className = 'ViTransformToTensor'
-
-    def __init__(self, name):
-        super().__init__(name)
-
-    def execFunction(self):
-        return transforms.ToTensor()
-
 
 class ViDatasetsMNIST(ViNode):
     className = 'ViDatasetsMNIST'
 
     def __init__(self, name):
         super().__init__(name)
-        self.addConnection('transform', None, None)
+        self.addConnection('transforms', None, None)
         self.params = {'root': '~/pydata', 'train': True, 'download': True}
 
     def execFunction(self):
         return datasets.MNIST(root=expanduser(self.params['root']), train=self.params['train'], download=self.params['download'],
-                              transform=self.inputCache['transform'])
+                              transform=transforms.Compose(self.inputCache['transforms']))
+
+    def initFunction(self):
+        self.setStage(1)
+        # The MNIST datasets are hosted on yann.lecun.com that has moved under CloudFlare protection
+        # Run this script to enable the datasets download
+        # Reference: https://github.com/pytorch/vision/issues/1938
+        from six.moves import urllib
+        opener = urllib.request.build_opener()
+        opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+        urllib.request.install_opener(opener)
+
+class ViDataset(ViNode):
+    className = 'ViDataset'
+
+    def __init__(self, name):
+        super().__init__(name)
+        self.addConnection('transforms', None, None)
+        self.params = {'root': '~/pydata', 'train': True, 'download': True,
+                       'dataset': {'selected': 'MNIST', 'list': ['MNIST','CIFAR10']}}
+
+    def execFunction(self):
+        if self.getParamValue('dataset') == 'MNIST':
+            return datasets.MNIST(root=expanduser(self.params['root']), train=self.params['train'], download=self.params['download'],
+                              transform=transforms.Compose(self.inputCache['transforms']))
+        if self.getParamValue('dataset') == 'CIFAR10':
+            return datasets.CIFAR10(root=expanduser(self.params['root']), train=self.params['train'], download=self.params['download'],
+                              transform=transforms.Compose(self.inputCache['transforms']))
 
     def initFunction(self):
         self.setStage(1)
@@ -622,6 +640,43 @@ class ViLoadModel(ViNode):
 
         return self.model
 
+class ViTransformToTensor(ViNode):
+    className = 'ViTransformToTensor'
+
+    def __init__(self, name):
+        super().__init__(name)
+        self.addConnection('transformsList', None, None)
+
+        self.f = None
+
+    def execFunction(self):
+        self.f = transforms.ToTensor()
+        seq = self.inputCache['transformsList']
+        if seq == None:
+            seq = []
+
+        seq.append(self.f)
+        return seq
+
+class ViNormalize(ViNode):
+    className = 'ViNormalize'
+
+    def __init__(self, name):
+        super().__init__(name)
+        self.params = {'mean0': 0.5, 'mean1': 0.5, 'mean2': 0.5, 'std0': 0.5, 'std1': 0.5, 'std2': 0.5}
+        self.addConnection('transformsList', None, None)
+
+        self.f = None
+
+    def execFunction(self):
+        self.f = transforms.Normalize((self.getParamValue('mean0'), self.getParamValue('mean1'), self.getParamValue('mean2')), (self.getParamValue('std0'), self.getParamValue('std1'), self.getParamValue('std2')))
+        seq = self.inputCache['transformsList']
+        if seq == None:
+            seq = []
+
+        seq.append(self.f)
+        return seq
+
 #TODO Usunąć niepotrzebne
 #TODO wyświetlanie grafu dla nauczonego :)
 #TODO convolution
@@ -639,6 +694,7 @@ class ViLoadModel(ViNode):
 #	train_loss = 0.0
 
 VINODES.append(ViTransformToTensor)
+VINODES.append(ViNormalize)
 VINODES.append(ViDatasetsMNIST)
 VINODES.append(ViDataLoader)
 VINODES.append(ViDataIter)
@@ -668,5 +724,7 @@ VINODES.append(ViLogChart)
 
 VINODES.append(ViSaveModel)
 VINODES.append(ViLoadModel)
+
+VINODES.append(ViDataset)
 # ViCriterion
 # ViOptimizer

@@ -30,7 +30,7 @@ class ViValueSliderFloat(ViNode):
         self.params = {'value': [0.0,0.5,1.0]}
 
     def execFunction(self):
-        return self.params['value'][1]
+        return self.getParamValue('value')
 
 class ViValueSelect(ViNode):
     className = 'ViValueSelect'
@@ -40,7 +40,7 @@ class ViValueSelect(ViNode):
         self.params = {'value': {'selected': 'jeden', 'list': ['zero','jeden','dwa']}}
 
     def execFunction(self):
-        return self.params['value']['selected']
+        return self.getParamValue('value')
 
 class ViAdd(ViNode):
     className = 'ViAdd'

@@ -74,7 +74,7 @@ def show_demo():
                 del nodeTo.inputConnections[connectionName]
 
     def save_all(sender, data):
-        # TODO zapis pozycji całego node editora
+        #TODO zapis pozycji całego node editora
 
         allViNodes = NAME_NODE_MAPPING
 
