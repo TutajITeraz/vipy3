@@ -8,10 +8,23 @@ import time
 import threading
 import json
 import pickle
+import bz2
+import _pickle as cPickle
+
 from os.path import expanduser
+
 
 DEFAULT_FOLDER = expanduser('~/pydata/')
 
+def compressed_pickle(filename, data):
+    with bz2.BZ2File(filename, 'w') as f:
+        cPickle.dump(data, f)
+
+# Load any compressed pickle file
+def decompress_pickle(filename):
+    data = bz2.BZ2File(filename, 'rb')
+    data = cPickle.load(data)
+    return data
 
 # virtualenv /usr/bin/python3 use global
 
@@ -88,7 +101,10 @@ def show_demo():
         savePackage = {'viNodes': allViNodes, 'links': links}
 
         outfile = open(DEFAULT_FOLDER + 'test.visave', 'wb+')
+
         pickle.dump(savePackage, outfile)
+        #compressed_pickle(outfile, savePackage)
+
         outfile.close()
 
         print(str(len(NAME_NODE_MAPPING)) + " items saved")
@@ -98,6 +114,7 @@ def show_demo():
 
         infile = open(DEFAULT_FOLDER + 'test.visave', 'rb')
         loadedPackage = pickle.load(infile)
+        #loadedPackage = decompress_pickle(DEFAULT_FOLDER + 'test.visave')
         infile.close()
 
         NAME_NODE_MAPPING = loadedPackage['viNodes']

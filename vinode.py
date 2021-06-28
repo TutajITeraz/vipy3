@@ -1,7 +1,7 @@
 from dearpygui.core import *
 from dearpygui.simple import *
 import copy
-
+import types
 
 NAME_NODE_MAPPING = {}
 VINODES = []
@@ -75,26 +75,51 @@ class ViNode:
         self.dpgNode = state['dpgNode']
         self.imgPreview = state['imgPreview']
         self.playDefaultOut = state['playDefaultOut']
-        self.texture = state['texture']
         self.textureSize = state['textureSize']
         self.needsUpdate = True
 
-        if len(self.texture) > 0:
-            self.textureSize[0] = 128
-            self.textureSize[1] = 128
+        #not pickled:
+        self.texture = []
 
-            self.texture=[]
+        #if len(self.texture) > 0:
+        self.textureSize[0] = 128
+        self.textureSize[1] = 128
 
-            for i in range(0, self.textureSize[0]*self.textureSize[1]):
-                self.texture.append(255)
-                self.texture.append(0)
-                self.texture.append(255)
+        self.texture=[]
+
+        for i in range(0, self.textureSize[0]*self.textureSize[1]):
+            self.texture.append(255)
+            self.texture.append(0)
+            self.texture.append(255)
 
         self.initFunction()
 
         print(str(self.dpgNode))
         self.addToNodeEditor("Node Editor 1##demo", self.dpgNode)
         print(state)
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        # Don't pickle texture
+        del state["texture"]
+        #
+        # stateOF = state['outputFunctions']
+        # for s in list(stateOF):
+        #     print('checking '+s)
+        #     #if hasattr(stateOF, s):
+        #     print('exists ' + s)
+        #     if type(stateOF[s]) == types.MethodType:
+        #         print('delete function:  ' + s)
+        #         del stateOF[s]
+        #
+        # for s in list(state):
+        #     print('checking '+s)
+        #     print('exists ' + s)
+        #     if type(state[s]) == types.MethodType:
+        #         print('delete function:  ' + s)
+        #         del state[s]
+
+        return state
 
     # def __del__(self):
     #    for ic in self.inputConnections:

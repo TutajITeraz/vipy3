@@ -3,6 +3,7 @@ from dearpygui.simple import *
 from vinode import *
 from torchvision import datasets
 import torchvision.transforms as transforms
+from torch.utils.data.sampler import SubsetRandomSampler
 
 import torch
 import numpy as np
@@ -69,15 +70,53 @@ class ViDataset(ViNode):
         urllib.request.install_opener(opener)
 
 
+class ViRandomSampler(ViNode):
+    className = 'ViRandomSampler'
+
+    def __init__(self, name):
+        super().__init__(name)
+        self.addConnection('train_data', None, None)
+        self.params = {'valid_size': [0.0,0.2,1.0]}
+        self.outputFunctions = {'train_sampler': self.getTrainSampler, 'valid_sampler': self.getValidSampler}
+        self.playDefaultOut = 'train_sampler'
+
+    def execFunction(self):
+        train_data = self.inputCache['train_data']
+        valid_size = self.getParamValue('valid_size')
+        num_train = len(train_data)
+        indices = list(range(num_train))
+
+        np.random.shuffle(indices)
+        split = int(np.floor(valid_size * num_train))
+        train_idx, valid_idx = indices[split:], indices[:split]
+
+        # define samplers for obtaining training and validation batches
+        self.train_sampler = SubsetRandomSampler(train_idx)
+        self.valid_sampler = SubsetRandomSampler(valid_idx)
+
+    def getTrainSampler(self):
+        self.execFunction()
+        return self.train_sampler
+
+    def getValidSampler(self):
+        self.execFunction()
+        return self.valid_sampler
+
 class ViDataLoader(ViNode):
     className = 'ViDataLoader'
 
     def __init__(self, name):
         super().__init__(name)
         self.addConnection('data', None, None)
+        self.addConnection('sampler', None, None)
         self.params = {'batch_size': 20, 'num_workers': 0}
 
     def execFunction(self):
+        sampler = self.getParamValue('sampler')
+        if sampler:
+            return torch.utils.data.DataLoader(self.inputCache['data'], batch_size=self.params['batch_size'],
+                                               num_workers=self.params['num_workers'], sampler=sampler)
+
         return torch.utils.data.DataLoader(self.inputCache['data'], batch_size=self.params['batch_size'],
                                            num_workers=self.params['num_workers'])
 
@@ -486,6 +525,80 @@ class ViSeqLinear(ViNode):
         seq.update({self.name: self.f})
         return seq
 
+class ViSeqConv2d(ViNode):
+    className = 'ViSeqConv2d'
+
+    def __init__(self, name):
+        super().__init__(name)
+        self.params = {'in_channels': 3, 'out_channels': 16, 'kernel_size': 3, 'stride': 1, 'padding': 1, 'dilation': 1}
+        self.addConnection('seq', None, None)
+
+        self.f = None
+
+    def execFunction(self):
+        in_channels = self.getParamValue('in_channels')
+        out_channels = self.getParamValue('out_channels')
+        kernel_size = self.getParamValue('kernel_size')
+        stride = self.getParamValue('stride')
+        padding = self.getParamValue('padding')
+        dilation = self.getParamValue('dilation')
+
+        self.f = nn.Conv2d(in_channels, out_channels, kernel_size, stride=stride, padding=padding, dilation=dilation )
+
+        seq = self.inputCache['seq']
+        if seq == None:
+            seq = OrderedDict([])
+
+        seq.update({self.name: self.f})
+        return seq
+
+class ViSeqMaxPool2d(ViNode):
+    className = 'ViSeqMaxPool2d'
+
+    def __init__(self, name):
+        super().__init__(name)
+        self.params = {'kernel_size': 2, 'stride': 2, 'padding': 0, 'dilation': 1}
+        self.addConnection('seq', None, None)
+
+        self.f = None
+
+    def execFunction(self):
+        kernel_size = self.getParamValue('kernel_size')
+        stride = self.getParamValue('stride')
+        padding = self.getParamValue('padding')
+        dilation = self.getParamValue('dilation')
+
+        self.f = nn.MaxPool2d(kernel_size, stride=stride, padding=padding, dilation=dilation)
+
+        seq = self.inputCache['seq']
+        if seq == None:
+            seq = OrderedDict([])
+
+        seq.update({self.name: self.f})
+        return seq
+
+class ViSeqDropout(ViNode):
+    className = 'ViSeqDropout'
+
+    def __init__(self, name):
+        super().__init__(name)
+        self.params = {'probability': [0.0,0.5,1.0]}
+        self.addConnection('seq', None, None)
+
+        self.f = None
+
+    def execFunction(self):
+        probability = self.getParamValue('probability')
+
+        self.f = nn.Dropout(p=probability)
+
+        seq = self.inputCache['seq']
+        if seq == None:
+            seq = OrderedDict([])
+
+        seq.update({self.name: self.f})
+        return seq
+
 class ViSeqReLU(ViNode):
     className = 'ViSeqReLU'
 
@@ -752,5 +865,11 @@ VINODES.append(ViSaveModel)
 VINODES.append(ViLoadModel)
 
 VINODES.append(ViDataset)
+VINODES.append(ViRandomSampler)
+
+VINODES.append(ViSeqConv2d)
+VINODES.append(ViSeqMaxPool2d)
+VINODES.append(ViSeqDropout)
+
 # ViCriterion
 # ViOptimizer
