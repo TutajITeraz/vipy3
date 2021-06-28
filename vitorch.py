@@ -149,15 +149,41 @@ class ViDataFigure(ViNode):
     def execFunction(self):
         # draw_image()
         imgdata = tensor_to_np(self.inputCache['imgdata'])
-        imgdata = np.stack((imgdata,) * 3, axis=-1)  # for grayscale
 
         # imgdata = grayscale_to_rgb(imgdata[0])
-        # print("IMG DATA"+ str(imgdata))
+        channelsNo = len(imgdata)
+        imagesHeight = len(imgdata[0])
+        imagesWidth = len(imgdata[0][0])
+        print("IMG DATA CHANNELS "+ str(channelsNo))
+        print("IMG DATA imagesHeight "+ str(imagesHeight))
+        print("IMG DATA imagesWidth "+ str(imagesWidth))
+
+        if channelsNo==1:
+            imgdata = np.stack((imgdata,) * 3, axis=-1)  # for grayscale
+        elif channelsNo==3:
+            rgbimg = []
+            rdata = imgdata[0]
+            gdata = imgdata[1]
+            bdata = imgdata[2]
+            for x in range(imagesWidth):
+                for y in range(imagesHeight):
+                    rgbimg.append(int(rdata[x][y]))
+                    rgbimg.append(int(gdata[x][y]))
+                    rgbimg.append(int(bdata[x][y]))
+            #for y in range(imagesHeight):
+            #    rgbimg.append([])
+            #    for x in range(imagesWidth):
+            #        rgbimg[y].append(int(rdata[x][y]))
+            #        rgbimg[y].append(int(gdata[x][y]))
+            #        rgbimg[y].append(int(bdata[x][y]))
+            imgdata = rgbimg
+        
+        print("Result imgdata len "+str(len(imgdata)))
 
         self.texture = imgdata
 
-        self.textureSize[0] = 28
-        self.textureSize[1] = 28
+        self.textureSize[0] = imagesWidth
+        self.textureSize[1] = imagesHeight
 
         # add_texture("#cooltexture", self.texture, 10, 10, format=mvTEX_RGBA_INT)
         add_texture(self.name + "#texture", self.texture, self.textureSize[0], self.textureSize[1],
