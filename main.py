@@ -102,7 +102,7 @@ def show_demo():
 
         outfile = open(DEFAULT_FOLDER + 'test.visave', 'wb+')
 
-        pickle.dump(savePackage, outfile)
+        pickle.dump(savePackage, outfile, protocol=-1)
         #compressed_pickle(outfile, savePackage)
 
         outfile.close()
