@@ -48,7 +48,8 @@ class MetaNode(Node):
     def dpg_right_click_menu(self):
         pass
 
-
+    def saveStatus(self): #TODO save
+        pass
 
 class Workspace:
     def __init__(self):
@@ -79,6 +80,7 @@ class Workspace:
 
     def get_element_by_uuid(self,uuid):#TODO get element by uuid
         pass
+
 
 
 
