@@ -120,6 +120,19 @@ def _update_dynamic_textures(sender, app_data, user_data):
 #Window:
 
 
+#Logger:
+    ## create a logger
+    logger = mvLogger()
+    logger.log_level = 0
+    logger.log("trace message")
+    logger.log_debug("debug message")
+    logger.log_info("info message")
+    logger.log_warning("warning message")
+    logger.log_error("error message")
+    logger.log_critical("critical message")
+
+    logger.log(f"{sender} '\t' {type} '\t' {data}")
+
 #Right click menu:
 
             with dpg.tree_node(label="Popups"):
