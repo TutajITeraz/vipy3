@@ -83,7 +83,8 @@ class MetaNode(Node):
 
     def deserialize(self, status):
         dpg.set_item_width(self.dpg_window_id,status['dpg_window_width'])
-        dpg.dpg_window_height(self.dpg_window_id,status['dpg_window_height'])
+        dpg.set_item_height(self.dpg_window_id,status['dpg_window_height'])
+
 
 
 
@@ -163,7 +164,7 @@ class Workspace:
 
         LOG.log(str(status))
 
-        pass
+        return status
 
     def deserialize(self,status):
         LOG.log(status)
@@ -171,6 +172,10 @@ class Workspace:
         meta_nodes_status = status['meta_nodes_status']
         for mns in meta_nodes_status:
             self.create_new_meta_node(mns,meta_nodes_status[mns])
+
+    def new_meta_node_callback(self,cbdata):
+        self.create_new_meta_node()
+
 
 
 WORKSPACE = Workspace()
@@ -183,7 +188,7 @@ dpg.add_menu_item(label='Load Last Workspace', parent=dpg_workspace_menu_id,call
 dpg.add_menu_item(label='Load Workspace...', parent=dpg_workspace_menu_id)#TODO load workspace
 dpg.add_menu_item(label='Save Workspace', parent=dpg_workspace_menu_id, callback=WORKSPACE.dpg_save_status_to_file_callback)
 dpg.add_menu_item(label='Save Workspace As...', parent=dpg_workspace_menu_id)#TODO save as workspace
-dpg.add_menu_item(label='New MetaNode', parent=dpg_workspace_menu_id, callback=WORKSPACE.create_new_meta_node)#TODO new MetaNode
+dpg.add_menu_item(label='New MetaNode', parent=dpg_workspace_menu_id, callback=WORKSPACE.new_meta_node_callback)#TODO new MetaNode
 dpg.add_menu_item(label='Load MetaNode', parent=dpg_workspace_menu_id)#TODO load MetaNode
 
 dpg.set_primary_window(DPG_PRIMARY_WINDOW_ID, True)

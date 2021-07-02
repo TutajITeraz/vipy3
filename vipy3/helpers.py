@@ -44,7 +44,8 @@ class Logger():#TODO logger with status bar and popup windows on error
             self.logger.log_critical(text)
 
 def save_data(data,filepath=DEFAULT_WORKSPACE_SAVE_PATH):
-    print('saving data to:'+str(filepath))
+    print('saving data to:'+str(expanduser(filepath)))
+    print('data lengts:'+str(len(data)))
     outfile = open(expanduser(filepath), 'wb+')
     pickle.dump(data, outfile, protocol=-1)
     outfile.close()
