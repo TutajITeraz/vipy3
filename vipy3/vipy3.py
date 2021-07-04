@@ -1,13 +1,14 @@
 import dearpygui.dearpygui as dpg
 from helpers import *
 
+
 class Node:
-    def __init__(self, meta_node=None, serialized_state=None):
+    def __init__(self, meta_node_uuid=None, serialized_state=None):
+        self.meta_node_uuid = meta_node_uuid
         self.uuid = gen_uuid()
         self.name = self.get_class_name()
-        self.meta_node=meta_node
 
-        self.inputs = {}
+        self.inputs = []
         self.outputs = {}
         self.stage = 0
 
@@ -16,9 +17,9 @@ class Node:
         if serialized_state:
             self.deserialize(serialized_state)
         else:
-            self.initialize()
+            self.initialize_values()
 
-    def initialize(self):
+    def initialize_values(self):
         pass
 
     def get_name(self):
@@ -30,16 +31,24 @@ class Node:
     def set_fresh(self,is_fresh):
         self.fresh = is_fresh
 
-    def get_fresh(self):
+    def is_fresh(self):
         fresh = self.fresh
         #TODO - check if params are fresh too
         return fresh
 
     def set_stage(self, stage):
         self.stage = stage
-        LOG.log(self.name + "(" + self.className + ")\t" + str(
-            self.execCounter) + "\t changed stage to: " + self.getStageName(stage))
+        LOG.log(self.get_name() + "\t changed stage to: " + self.get_stage_name(stage))
 
+    def get_input_by_name(self,name):
+        for i in self.inputs:
+            if self.inputs[i].getName() == name:
+                return self.inputs[i]
+
+        return None
+
+    def get_workspace(self):
+        return self.workspace
 
     def serialize(self):
         pass
@@ -47,30 +56,85 @@ class Node:
     def deserialize(self):
         pass
 
-    def render_node(self,parent_node_editor):
+    def render_node(self):
         pass
 
     def get_class_name(self):
         return type(self).__name__
 
+class InConn():
+    def __init__(self,parent_node,name,default_value):
+        self.parent_node = parent_node
+        self.name = name
+        self.value = default_value
+        self.uuid = gen_uuid()
+
+        self.connected_node_uuid = ''
+        self.connected_node_out_uuid = ''
+
+    def is_fresh(self):
+        pass
+
+    def connect_to(self):
+        pass
+
+    def get_value(self):
+        return self.value
+
+    def set_value(self):
+        return self.value
+
+    def get_name(self):
+        return self.name
+
+    def get_type(self):
+        return self.type
+
+    def get_uuid(self):
+        return self.uuid
+
+    def dpg_render(self):
+        pass
+
+class InConnInt():
+    def __init__(self,parent_node,name,default_value,min=0,max=100):
+        super().__init__(self,parent_node,name,default_value)
+        self.max = max
+        self.min = min
+
+    def dpg_render(self):
+        pass
+
+
+class ViAdd(Node):
+    def __init__(self, workspace, uuid='', serialized_state=''):
+        super().__init__(self, workspace, uuid, serialized_state, )
+
+    def initialize_values(self):
+        self.inputs = [InConnInt(self,'number_a',1,0,100),InConnInt(self,'number_b',1,0,100) ]
+        self.outputs = {}
+
+
+
 class MetaNode(Node):
-    def __init__(self, workspace, uuid='',serialized_state=''):
-        super().__init__()
-        self.parent_workspace = workspace
+    def __init__(self,  meta_node_uuid='', serialized_state='', parent_workspace=None):
+        super().__init__(meta_node_uuid, serialized_state)
 
-        if uuid != '':
-            self.uuid = uuid
+        self.nodes = {}
+        LOG.log("parent_workspace:"+str(parent_workspace))
+        self.parent_workspace = parent_workspace
 
-        if serialized_state != '':
-            self.deserialize(serialized_state)
-        else:
-            self.initialize()
-
-    def initialize(self):
+    def initialize_values(self):    #TODO: Separate initialize_values from render
         self.dpg_render_editor()
 
     def render_node(self):
         pass
+
+    def add_node(self,node_class):
+        pass
+
+    def add_node_callback(self,callback_data):
+        LOG.log(callback_data)
 
     def dpg_render_editor(self):
         self.dpg_window_id = dpg.add_window(label=self.get_name(), width=800, height=600, pos=(50, 50))
@@ -82,7 +146,7 @@ class MetaNode(Node):
         dpg.add_menu_item(label='Save MetaNode As...', parent=self.dpg_meta_node_menu_id)#TODO save as meta_node
 
         self.dpg_add_node_menu_id = dpg.add_menu(label='Add Node...', parent=self.dpg_menu_bar_id)
-        self.parent_workspace.dpg_render_available_nodes_to(self.dpg_add_node_menu_id)
+        self.parent_workspace.dpg_render_available_nodes_to(self.dpg_add_node_menu_id,self.add_node_callback)
 
         self.dpg_node_editor_id = dpg.add_node_editor(parent=self.dpg_window_id)
 
@@ -124,7 +188,7 @@ class Workspace:
     def __init__(self):
         self.uuid = uuid.uuid1()
         self.nodes_classes = {} 
-        self.nodes_available = {'math': {'add': None, 'sub': None, 'advanced': {'sqrt': None}}, 'AI':{'pytorch': None} }
+        self.nodes_available = {'math': {'add': ViAdd, 'sub': None, 'advanced': {'sqrt': None}}, 'AI':{'pytorch': None} }
         self.filepath = DEFAULT_WORKSPACE_SAVE_PATH
 
         self.meta_nodes = {}    #maps uuid to objects
@@ -132,10 +196,12 @@ class Workspace:
     def create_new_meta_node(self, uuid='', status=''):
         node = None
 
+        LOG.log('creating new meta_node. parent =', str(self))
+
         if uuid != '' and status != '':
-            node = MetaNode(self, uuid, status)
+            node = MetaNode(uuid, status, parent_workspace=self)
         else:
-            node = MetaNode(self)
+            node = MetaNode(parent_workspace=self)
 
         meta_node_uuid = node.get_uuid()
 
@@ -144,17 +210,20 @@ class Workspace:
     def get_available_nodes(self):
         return self.nodes_available
 
-    def dpg_render_available_nodes_to(self,parent,nodes=None):
+    def dpg_render_available_nodes_to(self,dpg_parent,callback,nodes=None):
         if not nodes:
             nodes = self.get_available_nodes()
 
         for n in nodes:
             LOG.log(n,type(nodes[n]))
             if type(nodes[n]) is dict:
-                menu_item_id = dpg.add_menu(label=n, parent=parent)
-                self.dpg_render_available_nodes_to(menu_item_id,nodes=nodes[n])
+                menu_item_id = dpg.add_menu(label=n, parent=dpg_parent)
+                self.dpg_render_available_nodes_to(menu_item_id,callback,nodes=nodes[n])
             else:
-                menu_item_id = dpg.add_menu_item(label=n, parent=parent)
+                if nodes[n] is not None:
+                    menu_item_id = dpg.add_menu_item(label=n, parent=dpg_parent, callback=callback)
+                else:
+                    menu_item_id = dpg.add_menu_item(label=n, parent=dpg_parent)
 
     def get_element_by_uuid(self,uuid):#TODO get element by uuid
         pass
@@ -171,9 +240,10 @@ class Workspace:
         self.filepath = filepath
 
         status = load_data(filepath)
-        LOG.log('loaded file:'+filepath+'and get status:'+str(status))
 
-        self.deserialize(status)
+        if status != None:
+            self.deserialize(status)
+            LOG.log('loaded file:' + filepath + 'and get status:' + str(status))
 
     def save_status_to_file(self, filepath=''):
         if filepath == '':
@@ -228,7 +298,7 @@ dpg.set_primary_window(DPG_PRIMARY_WINDOW_ID, True)
 
 
 #Default to speed up the work:
-WORKSPACE.load_status_from_file()
+#WORKSPACE.load_status_from_file()
 
 dpg.start_dearpygui()
 

@@ -8,7 +8,7 @@ except:
 from os.path import expanduser
 from dearpygui.logger import mvLogger
 
-
+import dearpygui.dearpygui as dpg
 
 DEFAULT_FOLDER='~/pydata/'
 DEFAULT_WORKSPACE_SAVE_PATH = DEFAULT_FOLDER + 'default.viworkspace'
@@ -40,8 +40,25 @@ class Logger():#TODO logger with status bar and popup windows on error
             self.logger.log_warning(text)
         elif level == 'error':
             self.logger.log_error(text)
+
+            with dpg.popup(dpg.last_item(), modal=True, mousebutton=dpg.mvMouseButton_Left) as modal_id:
+                dpg.add_text("Error")
+                dpg.add_separator()
+                dpg.add_text(text)
+                dpg.add_button(label="Close", width=75, callback=lambda: dpg.configure_item(modal_id, show=False))
+
         elif level == 'critical':
             self.logger.log_critical(text)
+            with dpg.tree_node(label="Critical Error"):
+                dpg.add_text(text)
+                dpg.add_button(label="Close")
+
+            with dpg.popup(dpg.last_item(), modal=True, mousebutton=dpg.mvMouseButton_Left) as modal_id:
+                dpg.add_text("Critical Error")
+                dpg.add_separator()
+                dpg.add_text(text)
+                dpg.add_button(label="Close", width=75, callback=lambda: dpg.configure_item(modal_id, show=False))
+
 
 def save_data(data,filepath=DEFAULT_WORKSPACE_SAVE_PATH):
     print('saving data to:'+str(expanduser(filepath)))
@@ -51,7 +68,11 @@ def save_data(data,filepath=DEFAULT_WORKSPACE_SAVE_PATH):
     outfile.close()
 
 def load_data(filepath=DEFAULT_WORKSPACE_SAVE_PATH):
-    infile = open(expanduser(filepath), 'rb')
+    try:
+        infile = open(expanduser(filepath), 'rb')
+    except:
+        LOG.log('error',"Cannot open file "+filepath)
+        return None
     data = pickle.load(infile)
     infile.close()
     return data
