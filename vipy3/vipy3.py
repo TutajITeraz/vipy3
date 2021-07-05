@@ -47,9 +47,6 @@ class Node:
 
         return None
 
-    def get_workspace(self):
-        return self.workspace
-
     def serialize(self):
         pass
 
@@ -133,9 +130,10 @@ class MetaNode(Node):
     def add_node(self,node_class):
         pass
 
-    def add_node_callback(self, sender, user_data):
-        LOG.log('add_node_callback sender'+ str(sender))
-        LOG.log('add_node_callback user_data'+ str(user_data))
+    def add_node_callback(self, sender, app_data, user_data):
+        LOG.log('add_node_callback sender '+ str(sender))
+        LOG.log('add_node_callback app_data ' + str(app_data))
+        LOG.log('add_node_callback user_data '+ str(user_data))
 
     def dpg_render_editor(self):
         self.dpg_window_id = dpg.add_window(label=self.get_name(), width=800, height=600, pos=(50, 50))
@@ -147,8 +145,12 @@ class MetaNode(Node):
         dpg.add_menu_item(label='Save MetaNode As...', parent=self.dpg_meta_node_menu_id)#TODO save as meta_node
 
         self.dpg_add_node_menu_id = dpg.add_menu(label='Add Node...', parent=self.dpg_menu_bar_id)
-        self.parent_workspace.dpg_render_available_nodes_to(self.dpg_add_node_menu_id, self)
+
+        #self.parent_workspace.dpg_render_available_nodes_to(self.dpg_add_node_menu_id, self)
+        avaliable_nodes = self.parent_workspace.get_available_nodes()
+        self.dpg_render_available_nodes_to(avaliable_nodes,self.dpg_add_node_menu_id)
         #self.parent_workspace.dpg_render_available_nodes_to(self.dpg_add_node_menu_id, (lambda self: lambda arg1, arg2: self.add_node_callback(arg1, arg2))(self))
+
         self.dpg_node_editor_id = dpg.add_node_editor(parent=self.dpg_window_id)
 
         #self.dpg_popup_id = dpg.popup(self.dpg_node_editor_id)
@@ -158,6 +160,19 @@ class MetaNode(Node):
         #dpg.add_menu_item(label='Add some node', parent=self.dpg_right_click_menu_id)  # TODO add some node
 
         self.dpg_is_rendered = True
+
+    def dpg_render_available_nodes_to(self,nodes,dpg_parent):
+        for n in nodes:
+            LOG.log(n,type(nodes[n]))
+            if type(nodes[n]) is dict:
+                menu_item_id = dpg.add_menu(label=n, parent=dpg_parent)
+                self.dpg_render_available_nodes_to(nodes[n],menu_item_id)
+            else:
+                if nodes[n] is not None:
+                    print('nodes[n]'+ str(nodes[n]))
+                    menu_item_id = dpg.add_menu_item(label=n, parent=dpg_parent, callback=self.add_node_callback, user_data=lambda: nodes[n]) #nodes[n]
+                else:
+                    menu_item_id = dpg.add_menu_item(label=n, parent=dpg_parent)
 
     def dpg_right_click_menu(self):
         pass
@@ -210,23 +225,6 @@ class Workspace:
 
     def get_available_nodes(self):
         return self.nodes_available
-
-    
-
-    def dpg_render_available_nodes_to(self,dpg_parent,callback_parent,nodes=None):
-        if not nodes:
-            nodes = self.get_available_nodes()
-
-        for n in nodes:
-            LOG.log(n,type(nodes[n]))
-            if type(nodes[n]) is dict:
-                menu_item_id = dpg.add_menu(label=n, parent=dpg_parent)
-                self.dpg_render_available_nodes_to(menu_item_id,callback_parent,nodes=nodes[n])
-            else:
-                if nodes[n] is not None:
-                    menu_item_id = dpg.add_menu_item(label=n, parent=dpg_parent, callback=callback_parent.add_node_callback, user_data=nodes[n])
-                else:
-                    menu_item_id = dpg.add_menu_item(label=n, parent=dpg_parent)
 
     def get_element_by_uuid(self,uuid):#TODO get element by uuid
         pass
