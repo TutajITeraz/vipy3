@@ -3,14 +3,15 @@ from helpers import *
 
 
 class Node:
-    def __init__(self, meta_node_uuid=None, serialized_state=None):
-        self.meta_node_uuid = meta_node_uuid
+    def __init__(self, parent_meta_node=None, serialized_state=None):
+        self.parent_meta_node = parent_meta_node
         self.uuid = gen_uuid()
         self.name = self.get_class_name()
 
         self.inputs = []
         self.outputs = {}
         self.stage = 0
+        self.position = [10,10]
 
         self.fresh = False
 
@@ -18,6 +19,9 @@ class Node:
             self.deserialize(serialized_state)
         else:
             self.initialize_values()
+
+        if parent_meta_node:
+            self.dpg_render()
 
     def initialize_values(self):
         pass
@@ -53,7 +57,12 @@ class Node:
     def deserialize(self):
         pass
 
-    def render_node(self):
+    def get_pos(self):
+        return self.position
+
+    def dpg_render(self):
+        self.dpg_node_id = dpg.add_node(label = self.get_name(), pos=self.get_pos(), parent=self.parent_meta_node.dpg_get_node_editor_id())
+
         pass
 
     def get_class_name(self):
@@ -68,6 +77,10 @@ class InConn():
 
         self.connected_node_uuid = ''
         self.connected_node_out_uuid = ''
+
+        #self.dpg_render()
+
+
 
     def is_fresh(self):
         pass
@@ -91,11 +104,13 @@ class InConn():
         return self.uuid
 
     def dpg_render(self):
+        dpg.add_input_int()#TODO
+
         pass
 
-class InConnInt():
+class InConnInt(InConn):
     def __init__(self,parent_node,name,default_value,min=0,max=100):
-        super().__init__(self,parent_node,name,default_value)
+        super().__init__(parent_node,name,default_value)
         self.max = max
         self.min = min
 
@@ -104,21 +119,20 @@ class InConnInt():
 
 
 class ViAdd(Node):
-    def __init__(self, workspace, uuid='', serialized_state=''):
-        super().__init__(self, workspace, uuid, serialized_state, )
+    def __init__(self, parent_meta_node=None, serialized_state=None):
+        super().__init__(parent_meta_node, serialized_state)
 
     def initialize_values(self):
         self.inputs = [InConnInt(self,'number_a',1,0,100),InConnInt(self,'number_b',1,0,100) ]
         self.outputs = {}
 
 
-
 class MetaNode(Node):
-    def __init__(self,  meta_node_uuid='', serialized_state='', parent_workspace=None):
+    def __init__(self,  parent_meta_node=None, serialized_state='', parent_workspace=None):
         self.parent_workspace = parent_workspace
         self.nodes = {}
         
-        super().__init__(meta_node_uuid, serialized_state)
+        super().__init__(parent_meta_node, serialized_state)
 
 
     def initialize_values(self):    #TODO: Separate initialize_values from render
@@ -134,6 +148,17 @@ class MetaNode(Node):
         LOG.log('add_node_callback sender '+ str(sender))
         LOG.log('add_node_callback app_data ' + str(app_data))
         LOG.log('add_node_callback user_data '+ str(user_data))
+
+        self.add_node_to_editor(user_data['node_class'])
+    
+    def add_node_to_editor(self, node_class):
+        LOG.log('add_node_to_editor: '+str(node_class))
+        new_node = node_class(parent_meta_node=self)
+
+        self.nodes[new_node.get_uuid()] = new_node
+    
+    def dpg_get_node_editor_id(self):
+        return self.dpg_node_editor_id
 
     def dpg_render_editor(self):
         self.dpg_window_id = dpg.add_window(label=self.get_name(), width=800, height=600, pos=(50, 50))
@@ -170,7 +195,8 @@ class MetaNode(Node):
             else:
                 if nodes[n] is not None:
                     print('nodes[n]'+ str(nodes[n]))
-                    menu_item_id = dpg.add_menu_item(label=n, parent=dpg_parent, callback=self.add_node_callback, user_data=lambda: nodes[n]) #nodes[n]
+
+                    menu_item_id = dpg.add_menu_item(label=n, parent=dpg_parent, callback=self.add_node_callback, user_data={'node_class': nodes[n]})
                 else:
                     menu_item_id = dpg.add_menu_item(label=n, parent=dpg_parent)
 
