@@ -60,10 +60,20 @@ class Node:
     def get_pos(self):
         return self.position
 
+    def default_executor(self):
+        return None
+
+    def get_dpg_node_id(self):
+        return self.dpg_node_id
+
     def dpg_render(self):
         self.dpg_node_id = dpg.add_node(label = self.get_name(), pos=self.get_pos(), parent=self.parent_meta_node.dpg_get_node_editor_id())
 
-        pass
+        for input in self.inputs:
+            self.inputs[input].dpg_render()
+
+        for output in self.outputs:
+            self.outputs[output].dpg_render()
 
     def get_class_name(self):
         return type(self).__name__
@@ -80,8 +90,6 @@ class InConn():
 
         #self.dpg_render()
 
-
-
     def is_fresh(self):
         pass
 
@@ -97,16 +105,13 @@ class InConn():
     def get_name(self):
         return self.name
 
-    def get_type(self):
-        return self.type
-
     def get_uuid(self):
         return self.uuid
 
     def dpg_render(self):
-        dpg.add_input_int()#TODO
-
-        pass
+        parent_node_id = self.parent_node.get_dpg_node_id()
+        self.dpg_attribute_id = dpg.add_node_attribute(parent=parent_node_id)
+        self.gpg_text_id = dpg.add_text(self.get_name(), parent=self.dpg_attribute_id)
 
 class InConnInt(InConn):
     def __init__(self,parent_node,name,default_value,min=0,max=100):
@@ -115,16 +120,50 @@ class InConnInt(InConn):
         self.min = min
 
     def dpg_render(self):
+        parent_node_id = self.parent_node.get_dpg_node_id()
+        self.dpg_attribute_id = dpg.add_node_attribute(parent=parent_node_id)
+        self.gpg_input_id = dpg.add_input_int(label=self.get_name(), default_value=self.get_value(), width=75, parent=self.dpg_attribute_id, max_value=self.max, min_value=self.min )
+
+class OutConn():
+    def __init__(self,parent_node,name,value_executor):
+        self.parent_node = parent_node
+        self.name = name
+        self.uuid = gen_uuid()
+        self.value_executor = value_executor
+
+    def is_fresh(self):
         pass
 
+    def connect_to(self):
+        pass
+
+    def get_value(self):
+        return self.value_executor()
+
+    def get_name(self):
+        return self.name
+
+    def get_uuid(self):
+        return self.uuid
+
+    def dpg_render(self):
+        parent_node_id = self.parent_node.get_dpg_node_id()
+        self.dpg_attribute_id = dpg.add_node_attribute(parent=parent_node_id,attribute_type=dpg.mvNode_Attr_Output)
+        self.gpg_text_id = dpg.add_text(self.get_name(), parent=self.dpg_attribute_id)
 
 class ViAdd(Node):
     def __init__(self, parent_meta_node=None, serialized_state=None):
         super().__init__(parent_meta_node, serialized_state)
 
     def initialize_values(self):
-        self.inputs = [InConnInt(self,'number_a',1,0,100),InConnInt(self,'number_b',1,0,100) ]
-        self.outputs = {}
+        self.inputs = {'a': InConnInt(self,'number a',1,0,100), 'b': InConnInt(self,'number b',1,0,100) }
+        self.outputs = {'result': OutConn(self,'result', self.default_executor)}
+
+    def default_executor(self):
+        a = self.inputs['a'].get_value()
+        b = self.inputs['b'].get_value()
+        result = a+b
+        return result
 
 
 class MetaNode(Node):
