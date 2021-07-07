@@ -1,6 +1,6 @@
 import dearpygui.dearpygui as dpg
 from helpers import *
-
+import sys
 
 class Node:
     def __init__(self, parent_meta_node=None, serialized_state=None):
@@ -14,6 +14,7 @@ class Node:
         self.position = [10,10]
 
         self.fresh = False
+        self.should_render_node = True
 
         if serialized_state:
             self.deserialize(serialized_state)
@@ -22,6 +23,7 @@ class Node:
 
         print(self.parent_meta_node)
 
+        print('class: '+str(self.get_class_name())+' parent_meta_node:'+str(self.parent_meta_node)+' should_render_node:'+str(self.should_render_node))
         if self.parent_meta_node and self.should_render_node:
             self.dpg_render_node()
 
@@ -70,11 +72,12 @@ class Node:
         for input in self.inputs:
             state['inputs'][input]=self.inputs[input].serialize()
 
+        #TODO serialize outputs
         for output in self.outputs:
             state['outputs'][output]=self.outputs[output].serialize()
 
+        return state
 
-        pass
 
     def deserialize(self,state):
 
@@ -83,13 +86,22 @@ class Node:
             input_class = getattr(sys.modules[__name__], input_class_name)
             self.inputs[input] = input_class(self,serialized_state=state['inputs'][input])
 
+        for output in state['outputs']:
+            self.outputs[output] = OutConn(self,output,None,state['outputs'][output])
+
         self.set_position(state['position'])
         self.fresh = False
 
-        pass
 
     def get_position(self):
+        if hasattr(self, 'dpg_node_id') and self.dpg_node_id is not None:
+            self.position = dpg.get_item_pos(self.dpg_node_id)
         return self.position
+
+    def set_position(self, position):
+        self.position = position
+        if hasattr(self,'dpg_node_id') and self.dpg_node_id is not None:
+            dpg.set_item_pos(self.dpg_node_id,position)
 
     def default_executor(self):
         return None
@@ -98,6 +110,8 @@ class Node:
         return self.dpg_node_id
 
     def dpg_render_node(self):
+        print('dpg_render_node')
+
         self.dpg_node_id = dpg.add_node(label = self.get_name(), pos=self.get_position(), parent=self.parent_meta_node.dpg_get_node_editor_id())
 
         for input in self.inputs:
@@ -119,6 +133,9 @@ class InConn():
         self.connected_node_uuid = ''
         self.connected_node_out_uuid = ''
 
+        if serialized_state is not None:
+            self.deserialize(serialized_state)
+
         #self.dpg_render()
     def get_class_name(self):
         return type(self).__name__
@@ -130,6 +147,8 @@ class InConn():
         pass
 
     def get_value(self):
+        if hasattr(self,'dpg_input_id') and self.dpg_input_id:
+            self.value = dpg.get_value(self.dpg_input_id)
         return self.value
 
     def set_value(self):
@@ -153,21 +172,20 @@ class InConnInt(InConn):
         self.max = max
         self.min = min
 
-        if serialized_state:
+        if serialized_state is not None:
             self.deserialize(serialized_state)
     
     def serialize(self):
         state = {}
         state['name']=self.get_name()
         state['class_name'] = self.get_class_name()
-        state['value'] = self.value
-        state['max']=max
-        state['min']=min
-        state['uuid']=self.get_uuid()
-        return state;
+        state['value'] = self.get_value()
+        state['max'] = self.max
+        state['min'] = self.min
+        state['uuid'] = self.get_uuid()
+        return state
 
-    def deserialize(self):
-        state = {}
+    def deserialize(self, state):
         self.name = state['name']
         self.value = state['value']
         self.max = state['max']
@@ -175,16 +193,35 @@ class InConnInt(InConn):
         self.uuid = state['uuid']
 
     def dpg_render(self):
+        print('dpg_render in conn int')
         parent_node_id = self.parent_node.get_dpg_node_id()
         self.dpg_attribute_id = dpg.add_node_attribute(parent=parent_node_id)
-        self.gpg_input_id = dpg.add_input_int(label=self.get_name(), default_value=self.get_value(), width=75, parent=self.dpg_attribute_id, max_value=self.max, min_value=self.min )
+        self.dpg_input_id = dpg.add_input_int(label=self.get_name(), default_value=self.get_value(), width=75, parent=self.dpg_attribute_id, max_value=self.max, min_value=self.min )
 
 class OutConn():
-    def __init__(self,parent_node,name,value_executor):
+    def __init__(self,parent_node,name,value_executor, state=None):
         self.parent_node = parent_node
         self.name = name
-        self.uuid = gen_uuid()
+        if uuid != '':
+            self.uuid = gen_uuid()
+        else:
+            self.uuid = uuid
         self.value_executor = value_executor
+
+        if state is not None:
+            self.deserialize(state)
+
+    def deserialize(self,state):
+        self.name = state['name']
+        self.uuid = state['uuid']
+        self.value_executor = state['value_executor']
+
+    def serialize(self):
+        state = {}
+        state['name'] = self.name
+        state['uuid'] = self.uuid
+        state['value_executor'] = self.value_executor
+        return state
 
     def is_fresh(self):
         pass
@@ -211,9 +248,8 @@ class ViAdd(Node):
         super().__init__(parent_meta_node, serialized_state)
 
     def initialize_values(self):
-        self.should_render_node = True
-        self.inputs = {'a': InConnInt(self,'number a',1,0,100), 'b': InConnInt(self,'number b',1,0,100) }
-        self.outputs = {'result': OutConn(self,'result', self.default_executor)}
+        self.inputs = {'a': InConnInt(self,'number a',1,None,0,100), 'b': InConnInt(self,'number b',1,None,0,100) }
+        self.outputs = {'result': OutConn(self,'result', 'default_executor')}
 
     def default_executor(self):
         a = self.inputs['a'].get_value()
@@ -237,9 +273,6 @@ class MetaNode(Node):
         self.dpg_render_editor()
 
     def render_node(self):
-        pass
-
-    def add_node(self,node_class):
         pass
 
     def add_node_callback(self, sender, app_data, user_data):
@@ -311,6 +344,10 @@ class MetaNode(Node):
             status['dpg_window_width'] = dpg.get_item_width(self.dpg_window_id)
             status['dpg_window_height'] = dpg.get_item_height(self.dpg_window_id)
             status['dpg_window_pos'] = dpg.get_item_pos(self.dpg_window_id)
+
+        status['nodes']={}
+        for n in self.nodes:
+            status['nodes'][n] = self.nodes[n].serialize()
         
         return status
 
@@ -322,6 +359,8 @@ class MetaNode(Node):
             dpg.set_item_height(self.dpg_window_id,status['dpg_window_height'])
             dpg.set_item_pos(self.dpg_window_id,status['dpg_window_pos'])
 
+        for n in status['nodes']:
+            self.nodes[n] = Node(self, status['nodes'][n])
 
 
 class Workspace:
@@ -333,13 +372,13 @@ class Workspace:
 
         self.meta_nodes = {}    #maps uuid to objects
 
-    def create_new_meta_node(self, uuid='', status=''):
+    def create_new_meta_node(self, status=''):
         node = None
 
         LOG.log('creating new meta_node. parent =', str(self))
 
-        if uuid != '' and status != '':
-            node = MetaNode(uuid, status, parent_workspace=self)
+        if status != '':
+            node = MetaNode(None, status, parent_workspace=self)
         else:
             node = MetaNode(parent_workspace=self)
 
@@ -366,6 +405,8 @@ class Workspace:
 
         status = load_data(filepath)
 
+        print(str(status))
+
         if status != None:
             self.deserialize(status)
             LOG.log('loaded file:' + filepath + 'and get status:' + str(status))
@@ -376,9 +417,10 @@ class Workspace:
 
         serializedStatus = self.serialize()
 
+        print(str(serializedStatus))
+
         save_data(serializedStatus,filepath)
 
-        pass
 
     def serialize(self):
         status = {}
@@ -399,7 +441,8 @@ class Workspace:
         self.nodes_available = status['nodes_available']
         meta_nodes_status = status['meta_nodes_status']
         for mns in meta_nodes_status:
-            self.create_new_meta_node(mns,meta_nodes_status[mns])
+            self.create_new_meta_node(meta_nodes_status[mns])
+
 
     def new_meta_node_callback(self,cbdata):
         self.create_new_meta_node()
