@@ -8,7 +8,7 @@ class Node:
         self.uuid = gen_uuid()
         self.name = self.get_class_name()
 
-        self.inputs = []
+        self.inputs = {}
         self.outputs = {}
         self.stage = 0
         self.position = [10,10]
@@ -20,8 +20,10 @@ class Node:
         else:
             self.initialize_values()
 
-        if parent_meta_node:
-            self.dpg_render()
+        print(self.parent_meta_node)
+
+        if self.parent_meta_node and self.should_render_node:
+            self.dpg_render_node()
 
     def initialize_values(self):
         pass
@@ -51,13 +53,42 @@ class Node:
 
         return None
 
+    def get_position():
+        self.position = dpg.get_item_pos(self.dpg_node_id);
+        return self.position
+
     def serialize(self):
+        self.position = self.get_position()
+
+        state = {}
+        state['uuid']=self.get_uuid();
+        state['name']=self.get_name();
+        state['position']=self.get_position();
+        state['inputs']={}
+        state['outputs']={}
+
+        for input in self.inputs:
+            state['inputs'][input]=self.inputs[input].serialize()
+
+        for output in self.outputs:
+            state['outputs'][output]=self.outputs[output].serialize()
+
+
         pass
 
-    def deserialize(self):
+    def deserialize(self,state):
+
+        for input in state['inputs']:
+            input_class_name = state['inputs'][input]['class_name']
+            input_class = getattr(sys.modules[__name__], input_class_name)
+            self.inputs[input] = input_class(self,serialized_state=state['inputs'][input])
+
+        self.set_position(state['position'])
+        self.fresh = False
+
         pass
 
-    def get_pos(self):
+    def get_position(self):
         return self.position
 
     def default_executor(self):
@@ -66,8 +97,8 @@ class Node:
     def get_dpg_node_id(self):
         return self.dpg_node_id
 
-    def dpg_render(self):
-        self.dpg_node_id = dpg.add_node(label = self.get_name(), pos=self.get_pos(), parent=self.parent_meta_node.dpg_get_node_editor_id())
+    def dpg_render_node(self):
+        self.dpg_node_id = dpg.add_node(label = self.get_name(), pos=self.get_position(), parent=self.parent_meta_node.dpg_get_node_editor_id())
 
         for input in self.inputs:
             self.inputs[input].dpg_render()
@@ -79,7 +110,7 @@ class Node:
         return type(self).__name__
 
 class InConn():
-    def __init__(self,parent_node,name,default_value):
+    def __init__(self,parent_node,name='',default_value=None, serialized_state=None):
         self.parent_node = parent_node
         self.name = name
         self.value = default_value
@@ -89,6 +120,8 @@ class InConn():
         self.connected_node_out_uuid = ''
 
         #self.dpg_render()
+    def get_class_name(self):
+        return type(self).__name__
 
     def is_fresh(self):
         pass
@@ -114,10 +147,32 @@ class InConn():
         self.gpg_text_id = dpg.add_text(self.get_name(), parent=self.dpg_attribute_id)
 
 class InConnInt(InConn):
-    def __init__(self,parent_node,name,default_value,min=0,max=100):
-        super().__init__(parent_node,name,default_value)
+    def __init__(self,parent_node,name='',default_value=None,serialized_state=None,min=0,max=100):
+        super().__init__(parent_node,name,default_value,serialized_state)
+        
         self.max = max
         self.min = min
+
+        if serialized_state:
+            self.deserialize(serialized_state)
+    
+    def serialize(self):
+        state = {}
+        state['name']=self.get_name()
+        state['class_name'] = self.get_class_name()
+        state['value'] = self.value
+        state['max']=max
+        state['min']=min
+        state['uuid']=self.get_uuid()
+        return state;
+
+    def deserialize(self):
+        state = {}
+        self.name = state['name']
+        self.value = state['value']
+        self.max = state['max']
+        self.min = state['min']
+        self.uuid = state['uuid']
 
     def dpg_render(self):
         parent_node_id = self.parent_node.get_dpg_node_id()
@@ -156,6 +211,7 @@ class ViAdd(Node):
         super().__init__(parent_meta_node, serialized_state)
 
     def initialize_values(self):
+        self.should_render_node = True
         self.inputs = {'a': InConnInt(self,'number a',1,0,100), 'b': InConnInt(self,'number b',1,0,100) }
         self.outputs = {'result': OutConn(self,'result', self.default_executor)}
 
@@ -170,6 +226,9 @@ class MetaNode(Node):
     def __init__(self,  parent_meta_node=None, serialized_state='', parent_workspace=None):
         self.parent_workspace = parent_workspace
         self.nodes = {}
+
+        self.should_render_editor = True
+        self.should_render_node = False
         
         super().__init__(parent_meta_node, serialized_state)
 
