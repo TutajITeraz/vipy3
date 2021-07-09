@@ -112,7 +112,7 @@ class Node:
     def dpg_render_node(self):
         print('dpg_render_node')
 
-        self.dpg_node_id = dpg.add_node(label = self.get_name(), pos=self.get_position(), parent=self.parent_meta_node.dpg_get_node_editor_id())
+        self.dpg_node_id = dpg.add_node(label = self.get_name(), pos=self.get_position(), parent=self.parent_meta_node.dpg_get_node_editor_id(), user_data={'node_uuid': self.get_uuid()})
 
         for input in self.inputs:
             self.inputs[input].dpg_render()

@@ -31,9 +31,46 @@ class MetaNode(Node):
         new_node = node_class(parent_meta_node=self)
 
         self.nodes[new_node.get_uuid()] = new_node
+
+    def get_node_by_uuid(uuid):
+        node = None
+        if hasattr(self.nodes, uuid):
+            node = self.nodes[uuid]
+
+        return node
     
     def dpg_get_node_editor_id(self):
         return self.dpg_node_editor_id
+
+    def dpg_link_callback(self,sender,app_data,user_data):
+        LOG.log('dpg_link_callback sender '+ str(sender))
+        LOG.log('dpg_link_callback app_data ' + str(app_data))
+        LOG.log('dpg_link_callback user_data '+ str(user_data))
+        node_1 = app_data[0]
+        node_2 = app_data[1]
+
+        node_1_data = dpg.get_item_user_data(node_1)
+        node_2_data = dpg.get_item_user_data(node_2)
+
+        LOG.log('dpg_link_callback node_1_data ' + str(node_1_data))
+        LOG.log('dpg_link_callback node_2_data ' + str(node_2_data))
+
+        #node_1_uuid = node_1_data['node_uuid']
+        #node_2_uuid = node_2_data['node_uuid']
+
+        #node_1_obj = get_node_by_uuid(node_1_uuid)
+        #node_2_obj = get_node_by_uuid(node_2_uuid)
+
+        #LOG.log('dpg_link_callback node_1_obj ' + str(node_1_obj))
+        #LOG.log('dpg_link_callback node_2_obj ' + str(node_2_obj))
+
+        return dpg.add_node_link(node_1, node_2, parent=sender)
+
+    def dpg_delink_callback(self,sender,app_data,user_data):
+        LOG.log('dpg_delink_callback sender '+ str(sender))
+        LOG.log('dpg_delink_callback app_data ' + str(app_data))
+        LOG.log('dpg_delink_callback user_data '+ str(user_data))
+        dpg.delete_item(app_data)
 
     def dpg_render_editor(self):
         self.dpg_window_id = dpg.add_window(label=self.get_name(), width=800, height=600, pos=(50, 50))
@@ -51,7 +88,7 @@ class MetaNode(Node):
         self.dpg_render_available_nodes_to(avaliable_nodes,self.dpg_add_node_menu_id)
         #self.parent_workspace.dpg_render_available_nodes_to(self.dpg_add_node_menu_id, (lambda self: lambda arg1, arg2: self.add_node_callback(arg1, arg2))(self))
 
-        self.dpg_node_editor_id = dpg.add_node_editor(parent=self.dpg_window_id)
+        self.dpg_node_editor_id = dpg.add_node_editor(parent=self.dpg_window_id, callback=self.dpg_link_callback, delink_callback=self.dpg_delink_callback)
 
         #self.dpg_popup_id = dpg.popup(self.dpg_node_editor_id)
         #self.dpg_popup_id = dpg.window(label='Rightclick fake window', modal=True)

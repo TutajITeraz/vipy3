@@ -1,19 +1,17 @@
 import dearpygui.dearpygui as dpg
 
-with dpg.window(label="Tutorial", width=400, height=400) as mainwindow:
-    class TestClass:
-        def __init__(self):
-            print('this should never be called')
+with dpg.window(label="Tutorial1", width=400, height=400) as mainwindow:
 
+    node_editor_id = dpg.add_node_editor(callback=lambda sender, app_data: dpg.add_node_link(app_data[0], app_data[1], parent=sender), 
+                             delink_callback=lambda sender, app_data: dpg.delete_item(app_data), parent= mainwindow)
 
-    def some_callback(sender, app_data, user_data):
-        print('any callback ')
+    node_id = dpg.add_node(label="Node 1", pos=[10, 10], parent= node_editor_id)
 
+with dpg.window(label="Tutorial2", width=400, height=400, pos=[420,0]) as mainwindow2:
 
-    DPG_PRIMARY_WINDOW_ID = dpg.add_window(label='test', width=800, height=600, pos=[50, 50])
-    with dpg.menu_bar(parent=DPG_PRIMARY_WINDOW_ID):
-        with dpg.menu(label="File"):
-            menu_item_id = dpg.add_menu_item(label='xxx', callback=some_callback, user_data=lambda: TestClass)
+    node_editor_id2 = dpg.add_node_editor(callback=lambda sender, app_data: dpg.add_node_link(app_data[0], app_data[1], parent=sender), 
+                             delink_callback=lambda sender, app_data: dpg.delete_item(app_data), parent= mainwindow2)
 
-dpg.set_primary_window(mainwindow, True)
+    node_id2 = dpg.add_node(label="Node 2", pos=[20, 20], parent= node_editor_id2)
+
 dpg.start_dearpygui()
