@@ -114,6 +114,9 @@ class Node:
 
         self.dpg_node_id = dpg.add_node(label = self.get_name(), pos=self.get_position(), parent=self.parent_meta_node.dpg_get_node_editor_id(), user_data={'node_uuid': self.get_uuid()})
 
+        print(' dpg_node_id = '+str(self.dpg_node_id))
+        print('user data of node = '+str(dpg.get_item_user_data(self.dpg_node_id)))
+
         for input in self.inputs:
             self.inputs[input].dpg_render()
 

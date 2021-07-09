@@ -41,5 +41,5 @@ class OutConn():
 
     def dpg_render(self):
         parent_node_id = self.parent_node.get_dpg_node_id()
-        self.dpg_attribute_id = dpg.add_node_attribute(parent=parent_node_id,attribute_type=dpg.mvNode_Attr_Output)
+        self.dpg_attribute_id = dpg.add_node_attribute(parent=parent_node_id,attribute_type=dpg.mvNode_Attr_Output, user_data=self)
         self.gpg_text_id = dpg.add_text(self.get_name(), parent=self.dpg_attribute_id)

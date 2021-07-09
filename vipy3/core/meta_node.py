@@ -46,31 +46,37 @@ class MetaNode(Node):
         LOG.log('dpg_link_callback sender '+ str(sender))
         LOG.log('dpg_link_callback app_data ' + str(app_data))
         LOG.log('dpg_link_callback user_data '+ str(user_data))
-        node_1 = app_data[0]
-        node_2 = app_data[1]
+        attr_from_dpg_id = app_data[0]
+        attr_to_dpg_id = app_data[1]
 
-        node_1_data = dpg.get_item_user_data(node_1)
-        node_2_data = dpg.get_item_user_data(node_2)
+        attr_from = dpg.get_item_user_data(attr_from_dpg_id)
+        attr_to = dpg.get_item_user_data(attr_to_dpg_id)
 
-        LOG.log('dpg_link_callback node_1_data ' + str(node_1_data))
-        LOG.log('dpg_link_callback node_2_data ' + str(node_2_data))
+        LOG.log('dpg_link_callback attr_from ' + str(attr_from))
+        LOG.log('dpg_link_callback attr_to ' + str(attr_to))
 
-        #node_1_uuid = node_1_data['node_uuid']
-        #node_2_uuid = node_2_data['node_uuid']
+        can_connect = attr_to.set_connected_node_out(attr_from)
 
-        #node_1_obj = get_node_by_uuid(node_1_uuid)
-        #node_2_obj = get_node_by_uuid(node_2_uuid)
+        result = False
+        if can_connect:
+            result = dpg.add_node_link(attr_from_dpg_id, attr_to_dpg_id, parent=sender, user_data=attr_to)
 
-        #LOG.log('dpg_link_callback node_1_obj ' + str(node_1_obj))
-        #LOG.log('dpg_link_callback node_2_obj ' + str(node_2_obj))
+        LOG.log('new link created: '+str(result))
 
-        return dpg.add_node_link(node_1, node_2, parent=sender)
+        return True
 
     def dpg_delink_callback(self,sender,app_data,user_data):
         LOG.log('dpg_delink_callback sender '+ str(sender))
         LOG.log('dpg_delink_callback app_data ' + str(app_data))
         LOG.log('dpg_delink_callback user_data '+ str(user_data))
-        dpg.delete_item(app_data)
+        
+        link_dpg_id = app_data
+
+        attr_to = dpg.get_item_user_data(link_dpg_id)
+
+        attr_to.set_connected_node_out(None)
+
+        dpg.delete_item(link_dpg_id)
 
     def dpg_render_editor(self):
         self.dpg_window_id = dpg.add_window(label=self.get_name(), width=800, height=600, pos=(50, 50))
@@ -129,6 +135,12 @@ class MetaNode(Node):
         status['nodes']={}
         for n in self.nodes:
             status['nodes'][n] = self.nodes[n].serialize()
+
+        #TODO add all links to status:
+        
+        #dpg_all_items = dpg.get_i
+        #for item in dpg_all_items:
+        #    print('item '+str(item))
         
         return status
 

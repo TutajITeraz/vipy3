@@ -9,8 +9,10 @@ class InConn():
         self.value = default_value
         self.uuid = gen_uuid()
 
-        self.connected_node_uuid = ''
-        self.connected_node_out_uuid = ''
+        #self.connected_node_uuid = ''
+        #self.connected_node_out_uuid = ''
+
+        self.connected_node_out = None
 
         if serialized_state is not None:
             self.deserialize(serialized_state)
@@ -18,6 +20,11 @@ class InConn():
         #self.dpg_render()
     def get_class_name(self):
         return type(self).__name__
+
+    def set_connected_node_out(self,node_out_attr):
+        self.connected_node_out = node_out_attr
+
+        return True# TODO Allow connection (check type)
 
     def is_fresh(self):
         pass
@@ -41,8 +48,10 @@ class InConn():
 
     def dpg_render(self):
         parent_node_id = self.parent_node.get_dpg_node_id()
-        self.dpg_attribute_id = dpg.add_node_attribute(parent=parent_node_id)
+        self.dpg_attribute_id = dpg.add_node_attribute(parent=parent_node_id, user_data=self)
         self.gpg_text_id = dpg.add_text(self.get_name(), parent=self.dpg_attribute_id)
+
+        print(' dpg_attribute_id = '+str(self.dpg_attribute_id))
 
 class InConnInt(InConn):
     def __init__(self,parent_node,name='',default_value=None,serialized_state=None,min=0,max=100):
@@ -74,5 +83,5 @@ class InConnInt(InConn):
     def dpg_render(self):
         print('dpg_render in conn int')
         parent_node_id = self.parent_node.get_dpg_node_id()
-        self.dpg_attribute_id = dpg.add_node_attribute(parent=parent_node_id)
-        self.dpg_input_id = dpg.add_input_int(label=self.get_name(), default_value=self.get_value(), width=75, parent=self.dpg_attribute_id, max_value=self.max, min_value=self.min )
+        self.dpg_attribute_id = dpg.add_node_attribute(parent=parent_node_id, user_data=self)
+        self.dpg_input_id = dpg.add_input_int(label=self.get_name(), default_value=self.get_value(), width=75, parent=self.dpg_attribute_id, max_value=self.max, min_value=self.min)
