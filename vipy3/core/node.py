@@ -30,6 +30,9 @@ class Node:
     def initialize_values(self):
         pass
 
+    def get_all_inputs(self):
+        return self.inputs
+
     def get_name(self):
         return self.name
 
@@ -50,8 +53,17 @@ class Node:
 
     def get_input_by_name(self,name):
         for i in self.inputs:
-            if self.inputs[i].getName() == name:
+            print('testing input i: '+i+' if has name: '+name+' and it has: '+str(self.inputs[i].get_name()))
+
+            if self.inputs[i].get_name() == name:
                 return self.inputs[i]
+
+        return None
+
+    def get_output_by_name(self,name):
+        for i in self.outputs:
+            if self.outputs[i].get_name() == name:
+                return self.outputs[i]
 
         return None
 

@@ -18,13 +18,28 @@ class InConn():
             self.deserialize(serialized_state)
 
         #self.dpg_render()
+
+    def get_dpg_attribute_id(self):
+        return self.dpg_attribute_id
+
     def get_class_name(self):
         return type(self).__name__
+
+    def get_connected_node_out(self):
+        return self.connected_node_out;
+
+    def get_parent_node(self):
+        return self.parent_node
 
     def set_connected_node_out(self,node_out_attr):
         self.connected_node_out = node_out_attr
 
         return True# TODO Allow connection (check type)
+
+    def is_connected(self):
+        if self.connected_node_out is not None:
+            return True
+        return False
 
     def is_fresh(self):
         pass
@@ -45,6 +60,9 @@ class InConn():
 
     def get_uuid(self):
         return self.uuid
+
+    def dpg_get_attribute_id(self):
+        return self.dpg_attribute_id
 
     def dpg_render(self):
         parent_node_id = self.parent_node.get_dpg_node_id()

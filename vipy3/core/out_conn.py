@@ -12,10 +12,16 @@ class OutConn():
         if state is not None:
             self.deserialize(state)
 
+    def get_dpg_attribute_id(self):
+        return self.dpg_attribute_id
+
     def deserialize(self,state):
         self.name = state['name']
         self.uuid = state['uuid']
         self.value_executor = state['value_executor']
+
+    def get_parent_node(self):
+        return self.parent_node
 
     def serialize(self):
         state = {}
@@ -43,3 +49,6 @@ class OutConn():
         parent_node_id = self.parent_node.get_dpg_node_id()
         self.dpg_attribute_id = dpg.add_node_attribute(parent=parent_node_id,attribute_type=dpg.mvNode_Attr_Output, user_data=self)
         self.gpg_text_id = dpg.add_text(self.get_name(), parent=self.dpg_attribute_id)
+
+    def dpg_get_attribute_id(self):
+        return self.dpg_attribute_id

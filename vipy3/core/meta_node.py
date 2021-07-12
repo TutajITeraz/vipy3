@@ -32,9 +32,13 @@ class MetaNode(Node):
 
         self.nodes[new_node.get_uuid()] = new_node
 
-    def get_node_by_uuid(uuid):
+    def get_node_by_uuid(self,uuid):
+        print('get_node_by uuuid all nodes uuids:')
+        for n in self.nodes:
+            print(n)
+
         node = None
-        if hasattr(self.nodes, uuid):
+        if self.nodes[uuid] is not None:
             node = self.nodes[uuid]
 
         return node
@@ -137,7 +141,31 @@ class MetaNode(Node):
             status['nodes'][n] = self.nodes[n].serialize()
 
         #TODO add all links to status:
-        
+
+        links = []
+
+        for node_uuid in self.nodes:
+            node_to = self.nodes[node_uuid]
+            node_inputs = node_to.get_all_inputs()
+            for input_name in node_inputs:
+                input = node_inputs[input_name]
+                if input.is_connected():
+                    output = input.get_connected_node_out()
+                    node_from = output.get_parent_node()
+
+                    link = {}
+                    link['from_node_uuid'] = node_from.get_uuid()
+                    link['to_node_uuid'] = node_to.get_uuid()
+                    link['from_attr_name'] = output.get_name()
+                    link['to_attr_name'] = input.get_name()
+
+                    print('link: ', str(link))
+
+                    links.append(link)
+
+
+        status['links'] =  links
+
         #dpg_all_items = dpg.get_i
         #for item in dpg_all_items:
         #    print('item '+str(item))
@@ -154,3 +182,23 @@ class MetaNode(Node):
 
         for n in status['nodes']:
             self.nodes[n] = Node(self, status['nodes'][n])
+
+        links = status['links']
+
+        for link in links:
+            print('deserialize link:', str(link))
+
+            link_from_node = self.get_node_by_uuid(link['from_node_uuid'])
+            link_to_node = self.get_node_by_uuid(link['to_node_uuid'])
+
+            link_from_attr = link_from_node.get_output_by_name(link['from_attr_name'])
+            link_to_attr = link_to_node.get_input_by_name(link['to_attr_name'])
+
+            print('link_from_attr :'+str(link_from_attr))
+            print('link_to_attr :'+str(link_to_attr))
+
+            link_from_dpg_id = link_from_attr.get_dpg_attribute_id()
+            link_to_dpg_id = link_to_attr.get_dpg_attribute_id()
+
+            dpg.add_node_link(link_from_dpg_id, link_to_dpg_id)#TODO WHY?
+            #dpg.add_node_link(attr_from_dpg_id, attr_to_dpg_id, parent=sender, user_data=attr_to)
