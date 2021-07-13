@@ -38,8 +38,10 @@ class MetaNode(Node):
             print(n)
 
         node = None
-        if self.nodes[uuid] is not None:
+        if uuid in self.nodes:
             node = self.nodes[uuid]
+        else:
+            LOG.log('warning', 'uuid '+uuid+' is not prezent in meta_node')
 
         return node
     
@@ -194,11 +196,13 @@ class MetaNode(Node):
             link_from_attr = link_from_node.get_output_by_name(link['from_attr_name'])
             link_to_attr = link_to_node.get_input_by_name(link['to_attr_name'])
 
+            link_to_attr.set_connected_node_out(link_from_attr)
+
             print('link_from_attr :'+str(link_from_attr))
             print('link_to_attr :'+str(link_to_attr))
 
             link_from_dpg_id = link_from_attr.get_dpg_attribute_id()
             link_to_dpg_id = link_to_attr.get_dpg_attribute_id()
 
-            dpg.add_node_link(link_from_dpg_id, link_to_dpg_id)#TODO WHY?
+            dpg.add_node_link(link_from_dpg_id, link_to_dpg_id, parent=self.dpg_get_node_editor_id())#TODO WHY?
             #dpg.add_node_link(attr_from_dpg_id, attr_to_dpg_id, parent=sender, user_data=attr_to)
