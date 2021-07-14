@@ -48,7 +48,7 @@ class ViNode:
     def __init__(self, name):
         self.name = name
         self.inputConnections = {}
-        self.params = {}
+        self.params = {} 
         self.inputCache = {}
         self.execCounter = []
         self.outputFunctions = {'out': self.execFunction}
