@@ -8,8 +8,11 @@ class Node:
         self.uuid = gen_uuid()
         self.name = self.get_class_name()
 
-        self.inputs = {}
-        self.outputs = {}
+        self.inputs = {} #TODO zmienić na []
+        self.outputs = {} #TODO zmienić na []
+        self.actions = {'get':'default_executor'} #TODO implement actions
+        self.visualizers = {'value':'value_widget'} #TODO implement visualizers
+
         self.stage = 0
         self.position = [10,10]
 
@@ -78,8 +81,8 @@ class Node:
         state['uuid']=self.get_uuid();
         state['name']=self.get_name();
         state['position']=self.get_position();
-        state['inputs']={}
-        state['outputs']={}
+        state['inputs']={}#TODO zmienić na []
+        state['outputs']={}#TODO zmienić na []
 
         for input in self.inputs:
             state['inputs'][input]=self.inputs[input].serialize()
@@ -95,7 +98,7 @@ class Node:
 
         self.uuid = state['uuid']
         self.name = state['name']
-        
+
         for input in state['inputs']:
             input_class_name = state['inputs'][input]['class_name']
             input_class = getattr(sys.modules[__name__], input_class_name)
