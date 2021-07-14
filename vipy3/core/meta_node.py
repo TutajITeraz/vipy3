@@ -204,5 +204,5 @@ class MetaNode(Node):
             link_from_dpg_id = link_from_attr.get_dpg_attribute_id()
             link_to_dpg_id = link_to_attr.get_dpg_attribute_id()
 
-            dpg.add_node_link(link_from_dpg_id, link_to_dpg_id, parent=self.dpg_get_node_editor_id())#TODO WHY?
+            dpg.add_node_link(link_from_dpg_id, link_to_dpg_id, parent=self.dpg_get_node_editor_id(), user_data=link_to_attr)#TODO WHY?
             #dpg.add_node_link(attr_from_dpg_id, attr_to_dpg_id, parent=sender, user_data=attr_to)
