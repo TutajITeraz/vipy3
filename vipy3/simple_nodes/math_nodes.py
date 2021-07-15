@@ -7,11 +7,11 @@ class ViAdd(Node):
     def __init__(self, parent_meta_node=None, serialized_state=None):
         super().__init__(parent_meta_node, serialized_state)
 
-        from ._math_nodes_impl import add_executor
-        setattr(self, 'add_executor', add_executor.__get__(self))
+        from ._add_exe import add_exe
+        setattr(self, 'add_exe', add_exe.__get__(self))
         
-        #add_executor_func = importlib.import_module('._math_nodes_impl','vipy3.simple_nodes').add_executor
-        #setattr(self, 'add_executor', add_executor_func.__get__(self))
+        #add_executor_func = importlib.import_module('._math_nodes_impl','vipy3.simple_nodes').add_exe
+        #setattr(self, 'add_exe', add_exe_func.__get__(self))
 
 
     def default_executor(self):

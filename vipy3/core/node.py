@@ -2,6 +2,7 @@ import dearpygui.dearpygui as dpg
 import sys
 import inspect
 from . import *
+import os
 
 class Node:
     def __init__(self, parent_meta_node=None, serialized_state=None):
@@ -11,7 +12,7 @@ class Node:
 
         self.inputs = []
         self.outputs = []
-        self.actions = {'exe_print':'Exe', 'gen_code': 'Gen code'} #TODO implement actions
+        self.actions = {'exe_print':'Exe', 'get_code': 'Gen code'} #TODO implement actions
         self.visualizers = {'value':'value_widget'} #TODO implement visualizers
         
         self.exe_cache = {}
@@ -35,12 +36,40 @@ class Node:
 
     #TODO set fresh to false when changing any input value
     
-    def gen_code(self):
+    def get_code(self, existing_code=''):
         #TODO code generator
-        pass
-    
+        code = existing_code
+
+        exe_func_name = 'add_exe'
+
+        func_to_call = getattr(self,exe_func_name)
+        params = inspect.signature(func_to_call).parameters
+
+        for param in params:
+            input_code = self._get_input_code(param)
+            code += str(param) + ' = ' + str(input_code) + '\n'
+
+        script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
+        rel_path = "../simple_nodes/"
+        abs_file_path = os.path.join(script_dir, rel_path)
+
+        f = open(abs_file_path+"/_"+exe_func_name+".py", "r")
+        code_file = f.read()
+        #for x in f:
+        #   print(x)
+        f.close()
+
+        code += code_file
+
+        print(code)
+        return code
+
+    def _get_input_code(self, input_name):
+        input = self.get_input_by_name(input_name)
+        return input.get_code()
+
     def exe_print(self):
-        exe_func_name = 'add_executor'
+        exe_func_name = 'add_exe'
         print(str(self.get_exe_result(exe_func_name)))
 
     def get_exe_result(self,exe_func_name):
