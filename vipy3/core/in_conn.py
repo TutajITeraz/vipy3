@@ -53,7 +53,10 @@ class InConn():
         pass
 
     def get_value(self):
-        if hasattr(self,'dpg_input_id') and self.dpg_input_id:
+
+        if self.is_connected():
+            self.value = self.get_connected_node_out().get_value()
+        elif hasattr(self,'dpg_input_id') and self.dpg_input_id:
             self.value = dpg.get_value(self.dpg_input_id)
         return self.value
 
