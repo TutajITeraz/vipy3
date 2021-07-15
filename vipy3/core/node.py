@@ -31,7 +31,7 @@ class Node:
             self.dpg_render_node()
             
     def get_exe_result(self,exe_func):
-        return self[exe_func]()
+        return getattr(self,exe_func)()
 
     def initialize_values(self):
         pass
