@@ -10,7 +10,7 @@ class Node:
 
         self.inputs = [] #TODO zmienić na []
         self.outputs = [] #TODO zmienić na []
-        self.actions = {'get':'default_executor'} #TODO implement actions
+        self.actions = {'exePrint':'Execute and print'} #TODO implement actions
         self.visualizers = {'value':'value_widget'} #TODO implement visualizers
 
         self.stage = 0
@@ -29,6 +29,10 @@ class Node:
         print('class: '+str(self.get_class_name())+' parent_meta_node:'+str(self.parent_meta_node)+' should_render_node:'+str(self.should_render_node))
         if self.parent_meta_node and self.should_render_node:
             self.dpg_render_node()
+    
+    
+    def exePrint(self):
+        print(str(self.default_executor()))
 
     def initialize_values(self):
         pass
