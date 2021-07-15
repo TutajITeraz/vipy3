@@ -1,5 +1,6 @@
 import dearpygui.dearpygui as dpg
 import sys
+import inspect
 from . import *
 
 class Node:
@@ -10,7 +11,7 @@ class Node:
 
         self.inputs = []
         self.outputs = []
-        self.actions = {'exePrint':'Execute and print'} #TODO implement actions
+        self.actions = {'exePrint':'Exe'} #TODO implement actions
         self.visualizers = {'value':'value_widget'} #TODO implement visualizers
         
         self.exe_cache = {}
@@ -36,14 +37,27 @@ class Node:
     
     
     def exePrint(self):
-        exe_func_name = 'default_executor'
+        exe_func_name = 'add_executor'
         print(str(self.get_exe_result(exe_func_name)))
 
     def get_exe_result(self,exe_func_name):
         if self.is_fresh() and exe_func_name in self.exe_cache:
             return self.exe_cache[exe_func_name]
 
-        self.exe_cache[exe_func_name] = getattr(self,exe_func_name)()
+        func_to_call = getattr(self,exe_func_name)
+        params=inspect.signature(func_to_call).parameters
+
+        print('try to gather function params:'+str(params))
+
+        args = []
+        for param in params:
+            print('get '+str(param))
+            value = self.get_input_value(param)
+            args.append(value)
+        
+        print('args '+str(args))
+
+        self.exe_cache[exe_func_name] = func_to_call(*args)
 
         self.set_fresh(True)
         return self.exe_cache[exe_func_name]

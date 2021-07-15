@@ -1,6 +1,3 @@
-def add_executor(self):
-    a = self.get_input_value('num_a')
-    b = self.get_input_value('num_b')
-
-    result = a+b
+def add_executor(self, num_a, num_b):
+    result = num_a+num_b
     return result
