@@ -29,6 +29,9 @@ class Node:
         print('class: '+str(self.get_class_name())+' parent_meta_node:'+str(self.parent_meta_node)+' should_render_node:'+str(self.should_render_node))
         if self.parent_meta_node and self.should_render_node:
             self.dpg_render_node()
+            
+    def get_exe_result(self,exe_func):
+        return self[exe_func]()
 
     def initialize_values(self):
         pass
