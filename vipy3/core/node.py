@@ -11,7 +11,7 @@ class Node:
 
         self.inputs = []
         self.outputs = []
-        self.actions = {'exePrint':'Exe'} #TODO implement actions
+        self.actions = {'exe_print':'Exe', 'gen_code': 'Gen code'} #TODO implement actions
         self.visualizers = {'value':'value_widget'} #TODO implement visualizers
         
         self.exe_cache = {}
@@ -35,8 +35,11 @@ class Node:
 
     #TODO set fresh to false when changing any input value
     
+    def gen_code(self):
+        #TODO code generator
+        pass
     
-    def exePrint(self):
+    def exe_print(self):
         exe_func_name = 'add_executor'
         print(str(self.get_exe_result(exe_func_name)))
 
