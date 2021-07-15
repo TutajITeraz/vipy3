@@ -72,7 +72,8 @@ class Node:
             return False
         
         for input in self.inputs:
-            if not input.is_fresh():
+            print('checking freshness of node '+str(input))
+            if input.is_fresh() == False:
                 return False
 
         return True

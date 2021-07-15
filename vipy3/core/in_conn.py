@@ -17,7 +17,7 @@ class InConn():
         if serialized_state is not None:
             self.deserialize(serialized_state)
 
-        self.is_fresh = False
+        self.fresh = False
 
         #self.dpg_render()
 
@@ -39,19 +39,15 @@ class InConn():
         return True# TODO Allow connection (check type)
     
     def is_fresh(self):
-
         if self.is_connected():
             return self.connected_node_out.is_fresh()
 
-        return self.is_fresh
+        return self.fresh
 
     def is_connected(self):
         if self.connected_node_out is not None:
             return True
         return False
-
-    def is_fresh(self):
-        pass
 
     def connect_to(self):
         pass
@@ -106,6 +102,8 @@ class InConnInt(InConn):
         self.max = state['max']
         self.min = state['min']
         self.uuid = state['uuid']
+
+        self.fresh = False
 
     def dpg_render(self):
         print('dpg_render in conn int')
