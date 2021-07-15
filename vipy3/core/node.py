@@ -12,6 +12,8 @@ class Node:
         self.outputs = {} #TODO zmienić na []
         self.actions = {'get':'default_executor'} #TODO implement actions
         self.visualizers = {'value':'value_widget'} #TODO implement visualizers
+        
+        self.exe_cache = {}
 
         self.stage = 0
         self.position = [10,10]
@@ -31,7 +33,8 @@ class Node:
             self.dpg_render_node()
             
     def get_exe_result(self,exe_func):
-        return getattr(self,exe_func)()
+        self.exe_cache[exe_func] = getattr(self,exe_func)()
+        return exe_cache[exe_func]
 
     def initialize_values(self):
         pass
