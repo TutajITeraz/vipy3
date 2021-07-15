@@ -8,8 +8,8 @@ class Node:
         self.uuid = gen_uuid()
         self.name = self.get_class_name()
 
-        self.inputs = {} #TODO zmienić na []
-        self.outputs = {} #TODO zmienić na []
+        self.inputs = [] #TODO zmienić na []
+        self.outputs = [] #TODO zmienić na []
         self.actions = {'get':'default_executor'} #TODO implement actions
         self.visualizers = {'value':'value_widget'} #TODO implement visualizers
 
@@ -55,18 +55,16 @@ class Node:
         LOG.log(self.get_name() + "\t changed stage to: " + self.get_stage_name(stage))
 
     def get_input_by_name(self,name):
-        for i in self.inputs:
-            print('testing input i: '+i+' if has name: '+name+' and it has: '+str(self.inputs[i].get_name()))
-
-            if self.inputs[i].get_name() == name:
-                return self.inputs[i]
+        for input in self.inputs:
+            if input.get_name() == name:
+                return input
 
         return None
 
     def get_output_by_name(self,name):
-        for i in self.outputs:
-            if self.outputs[i].get_name() == name:
-                return self.outputs[i]
+        for output in self.outputs:
+            if output.get_name() == name:
+                return output
 
         return None
 
@@ -84,12 +82,13 @@ class Node:
         state['inputs']={}#TODO zmienić na []
         state['outputs']={}#TODO zmienić na []
 
+        state['inputs']=[]
         for input in self.inputs:
-            state['inputs'][input]=self.inputs[input].serialize()
+            state['inputs'].append(input.serialize())
 
-        #TODO serialize outputs
+        state['outputs']=[]
         for output in self.outputs:
-            state['outputs'][output]=self.outputs[output].serialize()
+            state['outputs'].append(output.serialize())
 
         return state
 
@@ -99,13 +98,13 @@ class Node:
         self.uuid = state['uuid']
         self.name = state['name']
 
-        for input in state['inputs']:
-            input_class_name = state['inputs'][input]['class_name']
+        for inputState in state['inputs']:
+            input_class_name = inputState['class_name']
             input_class = getattr(sys.modules[__name__], input_class_name)
-            self.inputs[input] = input_class(self,serialized_state=state['inputs'][input])
+            self.inputs.append( input_class(self,serialized_state=inputState) )
 
-        for output in state['outputs']:
-            self.outputs[output] = OutConn(self,output,None,state['outputs'][output])
+        for outputState in state['outputs']:
+            self.outputs.append( OutConn(self,outputState['name'],None,outputState) )
 
         self.set_position(state['position'])
         self.fresh = False
@@ -136,10 +135,10 @@ class Node:
         print('user data of node = '+str(dpg.get_item_user_data(self.dpg_node_id)))
 
         for input in self.inputs:
-            self.inputs[input].dpg_render()
+            input.dpg_render()
 
         for output in self.outputs:
-            self.outputs[output].dpg_render()
+            output.dpg_render()
 
     def get_class_name(self):
         return type(self).__name__

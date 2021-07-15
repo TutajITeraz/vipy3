@@ -41,7 +41,7 @@ dpg.set_primary_window(DPG_PRIMARY_WINDOW_ID, True)
 #dpg.set_viewport_title("viiiiipy")
 
 #Default to speed up the work:
-WORKSPACE.load_status_from_file()
+#WORKSPACE.load_status_from_file()
 
 dpg.start_dearpygui()
 

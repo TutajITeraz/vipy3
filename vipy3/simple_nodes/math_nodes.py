@@ -7,11 +7,12 @@ class ViAdd(Node):
         super().__init__(parent_meta_node, serialized_state)
 
     def initialize_values(self):
-        self.inputs = {'a': InConnInt(self,'number a',1,None,0,100), 'b': InConnInt(self,'number b',1,None,0,100) }
-        self.outputs = {'result': OutConn(self,'result', 'default_executor')}
+        self.inputs = [ InConnInt(self,'number a',1,None,0,100), InConnInt(self,'number b',1,None,0,100) ]
+        self.outputs = [ OutConn(self,'result', 'default_executor') ]
 
     def default_executor(self):
-        a = self.inputs['a'].get_value()
-        b = self.inputs['b'].get_value()
+        a = self.getInputValue('number a')
+        b = self.getInputValue('number b')
+
         result = a+b
         return result

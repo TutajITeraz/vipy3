@@ -149,8 +149,7 @@ class MetaNode(Node):
         for node_uuid in self.nodes:
             node_to = self.nodes[node_uuid]
             node_inputs = node_to.get_all_inputs()
-            for input_name in node_inputs:
-                input = node_inputs[input_name]
+            for input in node_inputs:
                 if input.is_connected():
                     output = input.get_connected_node_out()
                     node_from = output.get_parent_node()
