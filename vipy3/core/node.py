@@ -8,10 +8,12 @@ class Node:
         self.uuid = gen_uuid()
         self.name = self.get_class_name()
 
-        self.inputs = [] #TODO zmienić na []
-        self.outputs = [] #TODO zmienić na []
+        self.inputs = []
+        self.outputs = []
         self.actions = {'exePrint':'Execute and print'} #TODO implement actions
         self.visualizers = {'value':'value_widget'} #TODO implement visualizers
+        
+        self.exe_cache = {}
 
         self.stage = 0
         self.position = [10,10]
@@ -29,10 +31,22 @@ class Node:
         print('class: '+str(self.get_class_name())+' parent_meta_node:'+str(self.parent_meta_node)+' should_render_node:'+str(self.should_render_node))
         if self.parent_meta_node and self.should_render_node:
             self.dpg_render_node()
+
+    #TODO set fresh to false when changing any input value
     
     
     def exePrint(self):
-        print(str(self.default_executor()))
+        exe_func_name = 'default_executor'
+        print(str(self.get_exe_result(exe_func_name)))
+
+    def get_exe_result(self,exe_func_name):
+        if self.is_fresh() and exe_func_name in self.exe_cache:
+            return self.exe_cache[exe_func_name]
+
+        self.exe_cache[exe_func_name] = getattr(self,exe_func_name)()
+
+        self.set_fresh(True)
+        return self.exe_cache[exe_func_name]
 
     def initialize_values(self):
         pass
@@ -49,10 +63,19 @@ class Node:
     def set_fresh(self,is_fresh):
         self.fresh = is_fresh
 
+    def get_input_value(self, input_name):
+        input = self.get_input_by_name(input_name)
+        return input.get_value()
+
     def is_fresh(self):
-        fresh = self.fresh
-        #TODO - check if params are fresh too
-        return fresh
+        if not self.fresh:
+            return False
+        
+        for input in self.inputs:
+            if not input.is_fresh():
+                return False
+
+        return True
 
     def set_stage(self, stage):
         self.stage = stage
@@ -130,6 +153,17 @@ class Node:
     def get_dpg_node_id(self):
         return self.dpg_node_id
 
+    def dpg_action_callback(self,sender,app_data,user_data):
+        getattr(self,user_data)()
+
+    def dpg_edit_callback(self,sender,app_data,user_data):
+        #TODO edit node callback
+        pass
+
+    def dpg_delete_callback(self,sender,app_data,user_data):
+        #TODO delete node callback
+        pass
+
     def dpg_render_node(self):
         print('dpg_render_node')
 
@@ -141,8 +175,20 @@ class Node:
         for input in self.inputs:
             input.dpg_render()
 
+        for visualizer in self.visualizers: #TODO render visualizers
+            pass
+
         for output in self.outputs:
             output.dpg_render()
+
+        self.fake_action_attribute_id = dpg.add_node_attribute(parent=self.dpg_node_id, attribute_type=dpg.mvNode_Attr_Static)
+        dpg.add_button(label='x', callback=self.dpg_delete_callback, parent=self.fake_action_attribute_id)
+        dpg.add_same_line(parent=self.fake_action_attribute_id)
+        dpg.add_button(label='edit', callback=self.dpg_edit_callback, parent=self.fake_action_attribute_id)
+
+        for action in self.actions:
+            dpg.add_same_line(parent=self.fake_action_attribute_id)
+            dpg.add_button(label=self.actions[action], callback=self.dpg_action_callback, user_data=action, parent=self.fake_action_attribute_id)
 
     def get_class_name(self):
         return type(self).__name__

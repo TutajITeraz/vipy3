@@ -31,13 +31,13 @@ class OutConn():
         return state
 
     def is_fresh(self):
-        pass
+        return self.parent_node.is_fresh()
 
     def connect_to(self):
         pass
 
     def get_value(self):
-        return self.value_executor()
+        return self.parent_node.get_exe_result(self.value_executor)
 
     def get_name(self):
         return self.name

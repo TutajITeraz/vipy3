@@ -11,8 +11,8 @@ class ViAdd(Node):
         self.outputs = [ OutConn(self,'result', 'default_executor') ]
 
     def default_executor(self):
-        a = self.getInputValue('number a')
-        b = self.getInputValue('number b')
+        a = self.get_input_value('number a')
+        b = self.get_input_value('number b')
 
         result = a+b
         return result
