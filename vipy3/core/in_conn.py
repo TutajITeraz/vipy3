@@ -60,11 +60,11 @@ class InConn():
             self.value = dpg.get_value(self.dpg_input_id)
         return self.value
 
-    def get_code(self):
+    def get_code(self, result_prefix=''):
         if self.is_connected():
-            return self.get_connected_node_out().get_code()
+            return self.get_connected_node_out().get_code(result_prefix)
         elif hasattr(self,'dpg_input_id') and self.dpg_input_id:
-            return dpg.get_value(self.dpg_input_id)
+            return result_prefix + str(dpg.get_value(self.dpg_input_id))
         return ''
 
     def set_value(self):

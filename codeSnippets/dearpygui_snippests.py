@@ -10,39 +10,6 @@ with dpg.theme() as theme:
 dpg.add_button(label="Click", callback=_log)
 dpg.set_item_theme(dpg.last_item(), theme)
 
-
-## Node editor
-
-        with dpg.collapsing_header(label="Node Editor"):
-
-            dpg.add_text("Ctrl+Click to remove a link.", bullet=True)
-
-            with dpg.node_editor(callback=lambda sender, app_data: dpg.add_node_link(app_data[0], app_data[1], parent=sender), 
-                             delink_callback=lambda sender, app_data: dpg.delete_item(app_data)):
-
-                with dpg.node(label="Node 1", pos=[10, 10]):
-
-                    with dpg.node_attribute():
-                        dpg.add_input_float(label="F1", width=150)
-
-                    with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Output):
-                        dpg.add_input_float(label="F2", width=150)
-
-                with dpg.node(label="Node 2", pos=[300, 10]):
-
-                    with dpg.node_attribute() as na2:
-                        dpg.add_input_float(label="F3", width=200)
-
-                    with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Output):
-                        dpg.add_input_float(label="F4", width=200)
-
-                with dpg.node(label="Node 3", pos=[25, 150]):                                  
-                    with dpg.node_attribute():
-                        dpg.add_input_text(label="T5", width=200)
-                    with dpg.node_attribute(attribute_type=dpg.mvNode_Attr_Static): 
-                        dpg.add_simple_plot(label="Node Plot", default_value=(0.3, 0.9, 2.5, 8.9), width=200, height=80, histogram=True)
-
-
 ## Modal and file
 
             with dpg.tree_node(label="Modals"):
@@ -117,21 +84,6 @@ def _update_dynamic_textures(sender, app_data, user_data):
             texture_data.append(new_color[3])
         dpg.set_value(demo_dynamic_texture_2, texture_data)
 
-#Window:
-
-
-#Logger:
-    ## create a logger
-    logger = mvLogger()
-    logger.log_level = 0
-    logger.log("trace message")
-    logger.log_debug("debug message")
-    logger.log_info("info message")
-    logger.log_warning("warning message")
-    logger.log_error("error message")
-    logger.log_critical("critical message")
-
-    logger.log(f"{sender} '\t' {type} '\t' {data}")
 
 #Right click menu:
 
@@ -149,39 +101,6 @@ def _update_dynamic_textures(sender, app_data, user_data):
                     dpg.add_selectable(label="Mackerel", user_data=[t, "Mackerel"], callback=lambda s, a, u: dpg.set_value(u[0], u[1]))
                     dpg.add_selectable(label="Pollock", user_data=[t, "Pollock"], callback=lambda s, a, u: dpg.set_value(u[0], u[1]))
                     dpg.add_selectable(label="Tilefish", user_data=[t, "Tilefish"], callback=lambda s, a, u: dpg.set_value(u[0], u[1]))
-
-#Menu:
-
-        with dpg.menu_bar():
-
-            with dpg.menu(label="File"):
-
-                dpg.add_menu_item(label="New")
-                dpg.add_menu_item(label="Open")
-
-                with dpg.menu(label="Open Recent"):
-
-                    dpg.add_menu_item(label="harrel.c")
-                    dpg.add_menu_item(label="patty.h")
-                    dpg.add_menu_item(label="nick.py")
-
-                dpg.add_menu_item(label="Save")
-                dpg.add_menu_item(label="Save As...")
-
-                with dpg.menu(label="Settings"):
-
-                    dpg.add_menu_item(label="Option 1", callback=_log, user_data=logger)
-                    dpg.add_menu_item(label="Option 2", check=True, callback=_log, user_data=logger)
-                    dpg.add_menu_item(label="Option 3", check=True, default_value=True, callback=_log, user_data=logger)
-
-                    with dpg.child(height=60, autosize_x=True, delay_search=True):
-                        for i in range(0, 10):
-                            dpg.add_text(f"Scolling Text{i}")
-
-                    dpg.add_slider_float(label="Slider Float")
-                    dpg.add_input_int(label="Input Int")
-                    dpg.add_combo(("Yes", "No", "Maybe"), label="Combo")
-
 
 #Loading indicator:
 

@@ -12,8 +12,9 @@ class Node:
 
         self.inputs = []
         self.outputs = []
-        self.actions = {'exe_print':'Exe', 'get_code': 'Gen code'} #TODO implement actions
+        self.actions = {'exe_print':'Exe', 'dpg_get_code_callback': 'Gen code'} #TODO implement actions
         self.visualizers = {'value':'value_widget'} #TODO implement visualizers
+        self.default_executor = ''
         
         self.exe_cache = {}
 
@@ -35,42 +36,59 @@ class Node:
             self.dpg_render_node()
 
     #TODO set fresh to false when changing any input value
+
+    def dpg_get_code_callback(self):
+        dpg.add
+        print(self.get_code(self.default_executor))
     
-    def get_code(self, existing_code=''):
+    def get_code(self, value_executor, result_prefix=''):
         #TODO code generator
-        code = existing_code
+        code = ''
 
-        exe_func_name = 'add_exe'
-
-        func_to_call = getattr(self,exe_func_name)
+        func_to_call = getattr(self,value_executor)
         params = inspect.signature(func_to_call).parameters
 
         for param in params:
-            input_code = self._get_input_code(param)
-            code += str(param) + ' = ' + str(input_code) + '\n'
+            input_code = self._get_input_code(param, self.get_name()+'_'+str(param) + ' = ')
+            code += input_code + '\n'
 
         script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
         rel_path = "../simple_nodes/"
         abs_file_path = os.path.join(script_dir, rel_path)
 
-        f = open(abs_file_path+"/_"+exe_func_name+".py", "r")
-        code_file = f.read()
-        #for x in f:
-        #   print(x)
+        f = open(abs_file_path+"/_"+value_executor+".py", "r")
+        #code_file = f.read()
+        for line in f:
+            if not 'def' in line:
+                print('line ======> '+line)
+                if line[0]==' ':
+                    line = line.lstrip()
+
+                if not 'return' in line:
+                    for param in params:
+                        line = line.replace(param, self.get_name()+'_'+param)
+                    code+=line 
+                elif result_prefix != '':
+                    print('line ======> (1) '+line)
+                    result_line = line.replace("return ", result_prefix)
+                    print('line ======> (1 result) '+result_line)
+                    code+=result_line
+                else:
+                    print('line ======> (2) '+line)
+                    result_line = line.replace("return ", "print( ") + " )"
+                    print('line ======> (2 result) '+result_line)
+                    code+=result_line
+
         f.close()
 
-        code += code_file
-
-        print(code)
         return code
 
-    def _get_input_code(self, input_name):
+    def _get_input_code(self, input_name, result_prefix=''):
         input = self.get_input_by_name(input_name)
-        return input.get_code()
+        return input.get_code(result_prefix)
 
     def exe_print(self):
-        exe_func_name = 'add_exe'
-        print(str(self.get_exe_result(exe_func_name)))
+        print(str(self.get_exe_result(self.default_executor)))
 
     def get_exe_result(self,exe_func_name):
         if self.is_fresh() and exe_func_name in self.exe_cache:
@@ -194,18 +212,15 @@ class Node:
         if hasattr(self,'dpg_node_id') and self.dpg_node_id is not None:
             dpg.set_item_pos(self.dpg_node_id,position)
 
-    def default_executor(self):
-        return None
-
     def get_dpg_node_id(self):
         return self.dpg_node_id
 
     def dpg_action_callback(self,sender,app_data,user_data):
         getattr(self,user_data)()
 
-    def dpg_edit_callback(self,sender,app_data,user_data):
-        #TODO edit node callback
-        pass
+    def set_name(self,name):
+        self.name = name
+        dpg.set_item_label(self.dpg_node_id,self.name)
 
     def dpg_delete_callback(self,sender,app_data,user_data):
         #TODO delete node callback
@@ -214,7 +229,7 @@ class Node:
     def dpg_render_node(self):
         print('dpg_render_node')
 
-        self.dpg_node_id = dpg.add_node(label = self.get_name()+' '+self.get_uuid(), pos=self.get_position(), parent=self.parent_meta_node.dpg_get_node_editor_id(), user_data={'node_uuid': self.get_uuid()})
+        self.dpg_node_id = dpg.add_node(label = self.get_name(), pos=self.get_position(), parent=self.parent_meta_node.dpg_get_node_editor_id(), user_data={'node_uuid': self.get_uuid()})
 
         print(' dpg_node_id = '+str(self.dpg_node_id))
         print('user data of node = '+str(dpg.get_item_user_data(self.dpg_node_id)))
@@ -231,7 +246,18 @@ class Node:
         self.fake_action_attribute_id = dpg.add_node_attribute(parent=self.dpg_node_id, attribute_type=dpg.mvNode_Attr_Static)
         dpg.add_button(label='x', callback=self.dpg_delete_callback, parent=self.fake_action_attribute_id)
         dpg.add_same_line(parent=self.fake_action_attribute_id)
-        dpg.add_button(label='edit', callback=self.dpg_edit_callback, parent=self.fake_action_attribute_id)
+        self.dpg_edit_button_id = dpg.add_button(label='edit', parent=self.fake_action_attribute_id)
+
+        #Edit modal:
+        with dpg.popup(self.dpg_edit_button_id, modal=True, mousebutton=dpg.mvMouseButton_Left) as modal_id:
+            dpg.add_text("Node names should be unique if you want to generate code")
+            self.dpg_new_name_input_id = dpg.add_input_text(parent=modal_id, label='name', default_value=self.get_name())
+            dpg.add_separator()
+            dpg.add_button(label="OK", width=75, callback=lambda: [self.set_name(dpg.get_value(self.dpg_new_name_input_id)), dpg.configure_item(modal_id, show=False)])
+            dpg.add_same_line()
+            dpg.add_button(label="Cancel", width=75, callback=lambda: dpg.configure_item(modal_id, show=False))
+
+
 
         for action in self.actions:
             dpg.add_same_line(parent=self.fake_action_attribute_id)

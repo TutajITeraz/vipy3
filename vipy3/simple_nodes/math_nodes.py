@@ -9,17 +9,15 @@ class ViAdd(Node):
 
         from ._add_exe import add_exe
         setattr(self, 'add_exe', add_exe.__get__(self))
+        self.default_executor = 'add_exe'
         
         #add_executor_func = importlib.import_module('._math_nodes_impl','vipy3.simple_nodes').add_exe
         #setattr(self, 'add_exe', add_exe_func.__get__(self))
 
 
-    def default_executor(self):
-        return self.add_executor()
-
     def initialize_values(self):
         self.inputs = [ InConnInt(self,'num_a',1,None,0,100), InConnInt(self,'num_b',1,None,0,100) ]
-        self.outputs = [ OutConn(self,'result', 'add_executor') ]
+        self.outputs = [ OutConn(self,'result', 'add_exe') ]
 
 #add_executor_func = importlib.import_module('._math_nodes_impl','vipy3.simple_nodes').add_executor
 #setattr(ViAdd, 'add_executor', classmethod( add_executor_func ) )
