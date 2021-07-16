@@ -38,7 +38,6 @@ class Node:
     #TODO set fresh to false when changing any input value
 
     def dpg_get_code_callback(self):
-        dpg.add
         print(self.get_code(self.default_executor))
     
     def get_code(self, value_executor, result_prefix=''):

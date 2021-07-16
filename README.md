@@ -3,8 +3,11 @@ Visual Python programming that supports pytorch, based on node editor provided b
 
 TODO
 ----
-* Create in place menu
+* Create right click menu in node editor
 * Save as... dialog
-* Save editor position
-* ViewSeq2d
-* Smaller file size
+* for
+* more input types
+* checking input type
+* hiding input on connection
+* deleting nodes
+* reimplement pytorch nodes
