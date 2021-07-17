@@ -3,11 +3,12 @@ import sys
 from . import *
 
 class InConn():
-    def __init__(self,parent_node,name='',default_value=None, serialized_state=None):
+    def __init__(self,parent_node,name='', default_value=None, serialized_state=None, type='any'):
         self.parent_node = parent_node
         self.name = name
         self.value = default_value
         self.uuid = gen_uuid()
+        self.type = type
 
         #self.connected_node_uuid = ''
         #self.connected_node_out_uuid = ''
@@ -35,6 +36,17 @@ class InConn():
 
     def set_connected_node_out(self,node_out_attr):
         self.connected_node_out = node_out_attr
+
+        if node_out_attr is None:
+            return True
+
+        if self.get_type() == 'any':
+            return True
+        elif self.get_type() == node_out_attr.get_type():
+            return True
+        else:
+            self.connected_node_out = None
+            return False
 
         return True# TODO Allow connection (check type)
     
@@ -76,6 +88,9 @@ class InConn():
     def get_uuid(self):
         return self.uuid
 
+    def get_type(self):
+        return self.type
+
     def dpg_get_attribute_id(self):
         return self.dpg_attribute_id
 
@@ -88,7 +103,8 @@ class InConn():
 
 class InConnInt(InConn):
     def __init__(self,parent_node,name='',default_value=None,serialized_state=None,min=0,max=100):
-        super().__init__(parent_node,name,default_value,serialized_state)
+        type = 'number'
+        super().__init__(parent_node,name,default_value,serialized_state,type)
         
         self.max = max
         self.min = min
@@ -104,6 +120,7 @@ class InConnInt(InConn):
         state['max'] = self.max
         state['min'] = self.min
         state['uuid'] = self.get_uuid()
+        state['type'] = self.type
         return state
 
     def deserialize(self, state):
@@ -112,6 +129,7 @@ class InConnInt(InConn):
         self.max = state['max']
         self.min = state['min']
         self.uuid = state['uuid']
+        self.type = state['type']
 
         self.fresh = False
 

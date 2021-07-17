@@ -222,8 +222,16 @@ class Node:
         dpg.set_item_label(self.dpg_node_id,self.name)
 
     def dpg_delete_callback(self,sender,app_data,user_data):
-        #TODO delete node callback
-        pass
+        dpg_node_attr_id = dpg.get_item_parent(sender)
+        dpg_node_id = dpg.get_item_parent(dpg_node_attr_id)
+
+
+        #TODO delete input links
+
+        #TODO delete output links
+
+
+        dpg.delete_item(dpg_node_id)
 
     def dpg_render_node(self):
         print('dpg_render_node')

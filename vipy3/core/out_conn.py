@@ -3,11 +3,12 @@ import sys
 from . import *
 
 class OutConn():
-    def __init__(self,parent_node,name,value_executor, state=None):
+    def __init__(self,parent_node,name,value_executor, state=None, type='any'):
         self.parent_node = parent_node
         self.name = name
         self.uuid = gen_uuid()
         self.value_executor = value_executor
+        self.type = type
 
         if state is not None:
             self.deserialize(state)
@@ -19,15 +20,21 @@ class OutConn():
         self.name = state['name']
         self.uuid = state['uuid']
         self.value_executor = state['value_executor']
+        self.type = state['type']
 
     def get_parent_node(self):
         return self.parent_node
+
+    def get_type(self):
+        return self.type
 
     def serialize(self):
         state = {}
         state['name'] = self.name
         state['uuid'] = self.uuid
         state['value_executor'] = self.value_executor
+        state['type'] = self.type
+
         return state
 
     def is_fresh(self):

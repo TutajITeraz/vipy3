@@ -49,9 +49,6 @@ class MetaNode(Node):
         return self.dpg_node_editor_id
 
     def dpg_link_callback(self,sender,app_data,user_data):
-        LOG.log('dpg_link_callback sender '+ str(sender))
-        LOG.log('dpg_link_callback app_data ' + str(app_data))
-        LOG.log('dpg_link_callback user_data '+ str(user_data))
         attr_from_dpg_id = app_data[0]
         attr_to_dpg_id = app_data[1]
 
@@ -66,6 +63,8 @@ class MetaNode(Node):
         result = False
         if can_connect:
             result = dpg.add_node_link(attr_from_dpg_id, attr_to_dpg_id, parent=sender, user_data=attr_to)
+        else:
+            LOG.log('error', 'Incompatible types. Cannot connect this nodes!')
 
         LOG.log('new link created: '+str(result))
 

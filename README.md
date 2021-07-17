@@ -7,7 +7,7 @@ TODO
 * Save as... dialog
 * for
 * more input types
-* checking input type
 * hiding input on connection
 * deleting nodes
 * reimplement pytorch nodes
+* dialog box on error
