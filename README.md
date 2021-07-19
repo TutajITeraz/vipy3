@@ -5,7 +5,7 @@ TODO
 ----
 * Create right click menu in node editor
 * Save as... dialog
-* for
+* Add code generator to for node
 * more input types
 * hiding input on connection
 * deleting node should delete all its links
@@ -15,3 +15,4 @@ TODO
 * Meta-node in/out
 * Meta-node recurent
 * Executing meta-node without dpg gui
+* Add serialize to inConn
