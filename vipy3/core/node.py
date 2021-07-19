@@ -38,11 +38,14 @@ class Node:
     #TODO set fresh to false when changing any input value
 
     def dpg_get_code_callback(self):
-        print(self.get_code(self.default_executor))
+        code = self.get_code(self.default_executor)
+        #print(code)
+        cw = CodeWindow(code)
     
     def get_code(self, value_executor, result_prefix=''):
         #TODO code generator
         code = ''
+        print('value_executor: ', str(value_executor))
 
         func_to_call = getattr(self,value_executor)
         params = inspect.signature(func_to_call).parameters
@@ -87,6 +90,7 @@ class Node:
         return input.get_code(result_prefix)
 
     def exe_print(self):
+        print('default_executor: ', self.default_executor)
         print(str(self.get_exe_result(self.default_executor)))
 
     def get_exe_result(self,exe_func_name):
@@ -167,11 +171,11 @@ class Node:
         self.position = self.get_position()
 
         state = {}
-        state['uuid']=self.get_uuid();
-        state['name']=self.get_name();
-        state['position']=self.get_position();
-        state['inputs']={}#TODO zmienić na []
-        state['outputs']={}#TODO zmienić na []
+        state['uuid']=self.get_uuid()
+        state['name']=self.get_name()
+        state['position']=self.get_position()
+        state['class_name']=self.get_class_name()
+
 
         state['inputs']=[]
         for input in self.inputs:

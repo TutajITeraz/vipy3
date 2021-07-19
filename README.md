@@ -11,5 +11,7 @@ TODO
 * deleting node should delete all its links
 * reimplement pytorch nodes
 * dialog box on error
-* generate code should open code editor window
-* 
+* Closing meta_node and main meta_nodes
+* Meta-node in/out
+* Meta-node recurent
+* Executing meta-node without dpg gui

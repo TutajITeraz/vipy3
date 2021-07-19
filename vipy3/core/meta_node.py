@@ -181,7 +181,10 @@ class MetaNode(Node):
             dpg.set_item_pos(self.dpg_window_id,status['dpg_window_pos'])
 
         for n in status['nodes']:
-            self.nodes[n] = Node(self, status['nodes'][n])
+            #TODO should create specific node class, not generic node
+            class_name = status['nodes'][n]['class_name']
+            node_class = getattr(sys.modules['vipy3'], class_name)
+            self.nodes[n] = node_class(self, status['nodes'][n])
 
         links = status['links']
 

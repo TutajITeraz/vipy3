@@ -5,6 +5,7 @@ from .helpers import Logger
 from .helpers import DEFAULT_WORKSPACE_SAVE_PATH
 from .helpers import DEFAULT_FOLDER
 from .helpers import LOG
+from .helpers import CodeWindow
 
 from .in_conn import *
 from .out_conn import *
