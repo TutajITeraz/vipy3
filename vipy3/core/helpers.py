@@ -54,7 +54,7 @@ class CodeWindow():
             try:
                 exec(self.code)
             except:
-                LOG('error','code error - exec exception')
+                LOG.log('error','code error - exec exception')
         result = s.getvalue()
 
         dpg.set_value(self.dpg_result_id, result)

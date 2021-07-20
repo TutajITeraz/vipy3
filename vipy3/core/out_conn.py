@@ -46,8 +46,8 @@ class OutConn():
     def get_value(self):
         return self.parent_node.get_exe_result(self.value_executor)
 
-    def get_code(self, result_prefix=''):
-        return self.parent_node.get_code(self.value_executor, result_prefix)
+    def get_code(self, result_prefix='',indent=''):
+        return self.parent_node.get_code(self.value_executor, result_prefix, indent=indent)
 
     def get_name(self):
         return self.name

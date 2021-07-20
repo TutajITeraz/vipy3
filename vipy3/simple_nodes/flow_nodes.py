@@ -25,3 +25,28 @@ class ViFor(Node):
     def initialize_values(self):
         self.inputs = [ InConnInt(self,'how_many',1,None,0,100), InConn(self,'data') ]
         self.outputs = [ OutConn(self,'result_list', 'for_exe', type='list'), OutConn(self,'i', 'get_iter', type='number') ]
+
+    def get_code(self, value_executor, result_prefix='', indent=''):
+        if(value_executor=='get_iter'):
+            return result_prefix +' '+self.get_name()+'_'+'iter'
+
+        code =''
+        param = 'how_many'
+        input_code = self._get_input_code(param, self.get_name()+'_'+param + ' = ')
+        code += input_code + '\n'
+        code += self.get_name()+'_'+'results = []\n'
+        code+='for '+self.get_name()+'_'+'iter in range('+self.get_name()+'_'+param+'):'+'\n'
+        code+=self._get_input_code('data', self.get_name()+'_'+str('data') + ' = ',indent='    ')+'\n'
+        code+='    '+self.get_name()+'_'+'results.append('+self.get_name()+'_'+'data)\n'
+
+        if result_prefix != '':
+            code+=result_prefix+' '+self.get_name()+'_'+'results\n'
+        else:
+            code+='print(str('+self.get_name()+'_'+'results))'
+
+        #Add indentation:
+        indent_code = ''
+        for line in code.splitlines():
+            indent_code += indent+line+'\n'
+
+        return indent_code

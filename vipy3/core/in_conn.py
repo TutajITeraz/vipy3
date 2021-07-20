@@ -72,11 +72,11 @@ class InConn():
             self.value = dpg.get_value(self.dpg_input_id)
         return self.value
 
-    def get_code(self, result_prefix=''):
+    def get_code(self, result_prefix='', indent=''):
         if self.is_connected():
-            return self.get_connected_node_out().get_code(result_prefix)
+            return self.get_connected_node_out().get_code(result_prefix, indent=indent)
         elif hasattr(self,'dpg_input_id') and self.dpg_input_id:
-            return result_prefix + str(dpg.get_value(self.dpg_input_id))
+            return indent+result_prefix + str(dpg.get_value(self.dpg_input_id))
         return ''
 
     def set_value(self):
@@ -100,6 +100,24 @@ class InConn():
         self.gpg_text_id = dpg.add_text(self.get_name(), parent=self.dpg_attribute_id)
 
         print(' dpg_attribute_id = '+str(self.dpg_attribute_id))
+
+    def serialize(self):
+        state = {}
+        state['name']=self.get_name()
+        state['class_name'] = self.get_class_name()
+        state['value'] = self.get_value()
+        state['uuid'] = self.get_uuid()
+        state['type'] = self.type
+        return state
+
+    def deserialize(self, state):
+        self.name = state['name']
+        self.value = state['value']
+        self.uuid = state['uuid']
+        self.type = state['type']
+
+        self.fresh = False
+
 
 class InConnInt(InConn):
     def __init__(self,parent_node,name='',default_value=None,serialized_state=None,min=0,max=100):

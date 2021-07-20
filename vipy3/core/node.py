@@ -42,8 +42,7 @@ class Node:
         #print(code)
         cw = CodeWindow(code)
     
-    def get_code(self, value_executor, result_prefix=''):
-        #TODO code generator
+    def get_code(self, value_executor, result_prefix='', indent=''):
         code = ''
         print('value_executor: ', str(value_executor))
 
@@ -83,11 +82,16 @@ class Node:
 
         f.close()
 
-        return code
+        #Add indentation:
+        indent_code = ''
+        for line in code.splitlines():
+            indent_code += indent+line+'\n'
 
-    def _get_input_code(self, input_name, result_prefix=''):
+        return indent_code
+
+    def _get_input_code(self, input_name, result_prefix='', indent=''):
         input = self.get_input_by_name(input_name)
-        return input.get_code(result_prefix)
+        return input.get_code(result_prefix,indent=indent)
 
     def exe_print(self):
         print('default_executor: ', self.default_executor)
