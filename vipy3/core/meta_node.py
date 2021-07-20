@@ -7,13 +7,26 @@ class MetaNode(Node):
         self.parent_workspace = parent_workspace
         self.nodes = {}
 
+        #Main meta node:
         self.should_render_editor = True
         self.should_render_node = False
-        
+
+        #Meta inside (as a node):
+        if parent_meta_node is not None:
+            self.should_render_editor = False
+            self.should_render_node = True
+
         super().__init__(parent_meta_node, serialized_state)
 
 
     def initialize_values(self):    #TODO: Separate initialize_values from render
+        if self.should_render_editor:
+            self.dpg_render_editor()
+
+        self.actions['open_meta_editor'] = 'Open Editor'
+
+    def open_meta_editor(self):
+        self.should_render_editor = True
         self.dpg_render_editor()
 
     def render_node(self):
@@ -28,7 +41,12 @@ class MetaNode(Node):
     
     def add_node_to_editor(self, node_class):
         LOG.log('add_node_to_editor: '+str(node_class))
-        new_node = node_class(parent_meta_node=self)
+
+        new_node = None
+        if node_class == MetaNode:
+            new_node = node_class(parent_meta_node=self, parent_workspace=self.parent_workspace)
+        else:
+            new_node = node_class(parent_meta_node=self)
 
         self.nodes[new_node.get_uuid()] = new_node
 

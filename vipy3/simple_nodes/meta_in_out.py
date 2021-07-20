@@ -5,11 +5,12 @@ import sys
 class ViMetaIn(Node):
     def __init__(self, parent_meta_node=None, serialized_state=None):
         super().__init__(parent_meta_node, serialized_state)
+        self.default_executor = 'bypass'
 
     def initialize_values(self):
-        self.outputs = {'input': OutConn(self,'input', 'default_executor')}
+        self.outputs = [OutConn(self,'input', 'bypass', type='any')]
 
-    def default_executor(self):
+    def bypass(self):
         return 1
 
 
@@ -17,17 +18,10 @@ class ViMetaIn(Node):
 class ViMetaOut(Node):
     def __init__(self, parent_meta_node=None, serialized_state=None):
         super().__init__(parent_meta_node, serialized_state)
+        self.default_executor = 'bypass'
 
     def initialize_values(self):
-        self.inputs = {'out': InConnInt(self,'out',1,None,0,100)}
+        self.inputs = [ InConn(self,'out') ]
 
-    def default_executor(self):
-        a = self.inputs['a'].get_value()
-        b = self.inputs['b'].get_value()
-        result = a+b
-        return result
-
-    def dpg_render_node(self):
-        super().dpg_render_node()
-
-        self.dpg_value_text = dpg.add_text(default_value='(value)',parent=self.dpg_node_id)
+    def bypass(self):
+        return 1

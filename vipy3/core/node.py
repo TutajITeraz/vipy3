@@ -12,7 +12,7 @@ class Node:
 
         self.inputs = []
         self.outputs = []
-        self.actions = {'exe_print':'Exe', 'dpg_get_code_callback': 'Gen code'} #TODO implement actions
+        self.actions = {'exe_print':'Exe', 'dpg_get_code_callback': 'Gen code'}
         self.visualizers = {'value':'value_widget'} #TODO implement visualizers
         self.default_executor = ''
         
@@ -233,6 +233,13 @@ class Node:
         dpg_node_attr_id = dpg.get_item_parent(sender)
         dpg_node_id = dpg.get_item_parent(dpg_node_attr_id)
 
+        dpg_attrs = dpg.get_item_children(dpg_node_id)
+        print(str(dpg_attrs))
+        for dpg_attr_id in dpg_attrs:
+            dpg_attr = dpg_attrs[dpg_attr_id]
+            for real_attr in dpg_attr:
+                dpg_conf = dpg.get_item_configuration(real_attr)
+                print(str(dpg_conf))
 
         #TODO delete input links
 

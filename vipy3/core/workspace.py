@@ -67,7 +67,7 @@ class Workspace:
 
     def serialize(self):
         status = {}
-        status['nodes_available'] = self.nodes_available
+        #status['nodes_available'] = self.nodes_available
         meta_nodes_status={}
         for mn in self.meta_nodes:
             meta_nodes_status[mn] = self.meta_nodes[mn].serialize()
@@ -81,7 +81,7 @@ class Workspace:
     def deserialize(self,status):
         #TODO should delete all existing meta nodes first
         LOG.log(status)
-        self.nodes_available = status['nodes_available']
+        #self.nodes_available = status['nodes_available']
         meta_nodes_status = status['meta_nodes_status']
         for mns in meta_nodes_status:
             self.create_new_meta_node(meta_nodes_status[mns])

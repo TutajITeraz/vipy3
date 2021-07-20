@@ -3,14 +3,27 @@ Visual Python programming tool that supports pytorch, based on node editor provi
 
 TODO
 ----
-* Create right click menu in node editor
+WIP:
+* Meta-node in/out (WIP)
+* Meta-node recursion (WIP)
+  
+High (engine) priority:
+* IF node
+* implement visualizers
+* hiding input on connection
+
+Medium priority:
+* Closing meta_node and main meta_nodes
+* Executing meta-node without dpg gui
+
+Low priority:
 * Save as... dialog
 * more input types
-* hiding input on connection
-* deleting node should delete all its links
 * reimplement pytorch nodes
 * dialog box on error
-* Closing meta_node and main meta_nodes
-* Meta-node in/out
-* Meta-node recurent
-* Executing meta-node without dpg gui
+
+Blocked:
+* deleting node should delete all its links (dpg dependent)
+* Create right click menu in node editor
+
+Author: Łukasz Bolda
