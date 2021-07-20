@@ -11,6 +11,7 @@ High (engine) priority:
 * IF node
 * implement visualizers
 * hiding input on connection
+* for loop containing actual code
 
 Medium priority:
 * Closing meta_node and main meta_nodes
@@ -23,6 +24,7 @@ Low priority:
 * dialog box on error
 * copy-paste nodes
 * MetaNode from selection
+* Node creator / node code editor
 
 Blocked:
 * deleting node should delete all its links (dpg dependent)
