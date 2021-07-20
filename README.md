@@ -21,6 +21,8 @@ Low priority:
 * more input types
 * reimplement pytorch nodes
 * dialog box on error
+* copy-paste nodes
+* MetaNode from selection
 
 Blocked:
 * deleting node should delete all its links (dpg dependent)
