@@ -40,7 +40,7 @@ class InConn():
         if node_out_attr is None:
             return True
 
-        if self.get_type() == 'any':
+        if self.get_type() == 'any' or node_out_attr.get_type() == 'any':
             return True
         elif self.get_type() == node_out_attr.get_type():
             return True

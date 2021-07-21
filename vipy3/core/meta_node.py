@@ -1,11 +1,13 @@
 import dearpygui.dearpygui as dpg
 from . import *
+from vipy3.simple_nodes.meta_in_out import *
 
 
 class MetaNode(Node):
     def __init__(self,  parent_meta_node=None, serialized_state='', parent_workspace=None):
         self.parent_workspace = parent_workspace
         self.nodes = {}
+        self.dpg_is_rendered = False
 
         #Main meta node:
         self.should_render_editor = True
@@ -39,14 +41,26 @@ class MetaNode(Node):
 
         self.add_node_to_editor(user_data['node_class'])
     
-    def add_node_to_editor(self, node_class):
+    def add_node_to_editor(self, node_class, state=None):
         LOG.log('add_node_to_editor: '+str(node_class))
 
         new_node = None
         if node_class == MetaNode:
-            new_node = node_class(parent_meta_node=self, parent_workspace=self.parent_workspace)
+            new_node = node_class(parent_meta_node=self, parent_workspace=self.parent_workspace, serialized_state=state)
         else:
-            new_node = node_class(parent_meta_node=self)
+            new_node = node_class(parent_meta_node=self, serialized_state=state)
+        
+            if node_class == ViMetaIn:
+                new_input = InConn(self,'in')
+                self.inputs.append( new_input )
+                if not state:
+                    new_input.dpg_render()
+
+            elif node_class == ViMetaOut:
+                new_output = OutConn(self,'out', 'bypass', type='any')
+                self.outputs.append( new_output )
+                if not state:
+                    new_output.dpg_render()
 
         self.nodes[new_node.get_uuid()] = new_node
 
@@ -102,7 +116,12 @@ class MetaNode(Node):
         dpg.delete_item(link_dpg_id)
 
     def dpg_render_editor(self):
-        self.dpg_window_id = dpg.add_window(label=self.get_name(), width=800, height=600, pos=(50, 50))
+        position = [50,50]
+        if self.parent_meta_node is not None:
+            position = self.parent_meta_node.dpg_get_window_pos()
+            position[0] += 20
+            position[1] += 20
+        self.dpg_window_id = dpg.add_window(label=self.get_name(), width=800, height=600, pos=position)
 
         self.dpg_menu_bar_id = dpg.add_menu_bar(label='Workspace menu bar', parent=self.dpg_window_id)
         self.dpg_meta_node_menu_id = dpg.add_menu(label='MetaNode', parent=self.dpg_menu_bar_id)
@@ -147,19 +166,33 @@ class MetaNode(Node):
     def saveStatusToFile(self): #TODO save
         pass
 
+    def dpg_get_window_pos(self):
+        return dpg.get_item_pos(self.dpg_window_id)
+
     def serialize(self):
         status = {}
+        status['uuid']=self.get_uuid()
+        status['name']=self.get_name()
+
+
         status['dpg_is_rendered'] = self.dpg_is_rendered
+        status['class_name']=self.get_class_name()
+        status['should_render_editor'] = self.should_render_editor
+        status['should_render_node'] = self.should_render_node
+        status['actions'] = self.actions
+
+        if hasattr(self,'dpg_node_id'):
+            print("NODE POSITION SAVED:"+str(self.get_position()))
+            status['position']=self.get_position()
+
         if self.dpg_is_rendered:
             status['dpg_window_width'] = dpg.get_item_width(self.dpg_window_id)
             status['dpg_window_height'] = dpg.get_item_height(self.dpg_window_id)
-            status['dpg_window_pos'] = dpg.get_item_pos(self.dpg_window_id)
+            status['dpg_window_pos'] = self.dpg_get_window_pos()
 
         status['nodes']={}
         for n in self.nodes:
             status['nodes'][n] = self.nodes[n].serialize()
-
-        #TODO add all links to status:
 
         links = []
 
@@ -191,7 +224,14 @@ class MetaNode(Node):
         return status
 
     def deserialize(self, status):
+        self.uuid = status['uuid']
+        self.name = status['name']
+
         self.dpg_is_rendered = status['dpg_is_rendered']
+        self.should_render_editor = status['should_render_editor']
+        self.should_render_node = status['should_render_node']
+        self.actions = status['actions']
+
         if self.dpg_is_rendered:
             self.dpg_render_editor()
             dpg.set_item_width(self.dpg_window_id,status['dpg_window_width'])
@@ -202,7 +242,7 @@ class MetaNode(Node):
             #TODO should create specific node class, not generic node
             class_name = status['nodes'][n]['class_name']
             node_class = getattr(sys.modules['vipy3'], class_name)
-            self.nodes[n] = node_class(self, status['nodes'][n])
+            self.add_node_to_editor(node_class,status['nodes'][n])
 
         links = status['links']
 
@@ -225,3 +265,8 @@ class MetaNode(Node):
 
             dpg.add_node_link(link_from_dpg_id, link_to_dpg_id, parent=self.dpg_get_node_editor_id(), user_data=link_to_attr)#TODO WHY?
             #dpg.add_node_link(attr_from_dpg_id, attr_to_dpg_id, parent=sender, user_data=attr_to)
+
+        if 'position' in status:
+            self.set_position(status['position'])
+
+        self.fresh = False
