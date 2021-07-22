@@ -19,6 +19,7 @@ class MetaNode(Node):
             self.should_render_node = True
 
         super().__init__(parent_meta_node, serialized_state)
+        self.default_executor='bypass'
 
 
     def initialize_values(self):    #TODO: Separate initialize_values from render
@@ -40,6 +41,9 @@ class MetaNode(Node):
         LOG.log('add_node_callback user_data '+ str(user_data))
 
         self.add_node_to_editor(user_data['node_class'])
+
+    def bypass(self):
+        print("Bypass function")
     
     def add_node_to_editor(self, node_class, state=None):
         LOG.log('add_node_to_editor: '+str(node_class))
