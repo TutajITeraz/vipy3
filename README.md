@@ -8,6 +8,7 @@ WIP:
 * Meta-node recursion (WIP)
   
 High (engine) priority:
+* color nodes based on execution state and freshness
 * IF node
 * implement visualizers
 * hiding input on connection
