@@ -19,7 +19,7 @@ class MetaNode(Node):
             self.should_render_node = True
 
         super().__init__(parent_meta_node, serialized_state)
-        self.default_executor='bypass'
+        self.default_executor='outside_call'
 
 
     def initialize_values(self):    #TODO: Separate initialize_values from render
@@ -42,8 +42,34 @@ class MetaNode(Node):
 
         self.add_node_to_editor(user_data['node_class'])
 
-    def bypass(self):
-        print("Bypass function")
+    #This function is always called from outside
+    def outside_call(self):
+        #Get ViMetaOut
+        output = self.get_output_by_name('out')
+        result = output.get_value()
+
+        print("Meta node outside call:"+str(result))
+
+        return result
+
+    def get_meta_out_nodes(self):
+        results = []
+        for node in self.nodes:
+            if node.__class__ == ViMetaOut:
+                results.append(node)
+        return results
+
+
+    def inside_call(self):
+        #Get Out NODE
+
+        out_nodes = self.get_meta_out_nodes()
+        for n in out_nodes:
+            result = n.get_exe_result()
+            print("Meta node inside call:" + str(result))
+            return result
+
+        return None
     
     def add_node_to_editor(self, node_class, state=None):
         LOG.log('add_node_to_editor: '+str(node_class))
@@ -61,7 +87,7 @@ class MetaNode(Node):
                     new_input.dpg_render()
 
             elif node_class == ViMetaOut:
-                new_output = OutConn(self,'out', 'bypass', type='any')
+                new_output = OutConn(self,'out', 'inside_call', type='any')
                 self.outputs.append( new_output )
                 if not state:
                     new_output.dpg_render()

@@ -11,7 +11,8 @@ class ViMetaIn(Node):
         self.outputs = [OutConn(self,'input', 'bypass', type='any')]
 
     def bypass(self):
-        return 1
+        value = self.parent_meta_node.get_input_value('in')
+        return value
 
 
 
@@ -23,5 +24,5 @@ class ViMetaOut(Node):
     def initialize_values(self):
         self.inputs = [ InConn(self,'out') ]
 
-    def bypass(self):
-        return 1
+    def bypass(self,out):
+        return out

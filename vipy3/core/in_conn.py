@@ -105,7 +105,7 @@ class InConn():
         state = {}
         state['name']=self.get_name()
         state['class_name'] = self.get_class_name()
-        state['value'] = self.get_value()
+        state['value'] = self.value #not get_value because we do not want to calculate
         state['uuid'] = self.get_uuid()
         state['type'] = self.type
         return state

@@ -97,7 +97,10 @@ class Node:
         print('default_executor: ', self.default_executor)
         print(str(self.get_exe_result(self.default_executor)))
 
-    def get_exe_result(self,exe_func_name):
+    def get_exe_result(self,exe_func_name=''):
+        if exe_func_name == '':
+            exe_func_name=self.default_executor
+
         if self.is_fresh() and exe_func_name in self.exe_cache:
             return self.exe_cache[exe_func_name]
 
