@@ -134,7 +134,7 @@ class InConnInt(InConn):
         state = {}
         state['name']=self.get_name()
         state['class_name'] = self.get_class_name()
-        state['value'] = self.get_value()
+        state['value'] = self.value     #should not get value when serialization
         state['max'] = self.max
         state['min'] = self.min
         state['uuid'] = self.get_uuid()
@@ -152,7 +152,7 @@ class InConnInt(InConn):
         self.fresh = False
 
     def dpg_render(self):
-        print('dpg_render in conn int')
+        print('dpg_render in conn int value:'+str(self.value))
         parent_node_id = self.parent_node.get_dpg_node_id()
         self.dpg_attribute_id = dpg.add_node_attribute(parent=parent_node_id, user_data=self)
-        self.dpg_input_id = dpg.add_input_int(label=self.get_name(), default_value=self.get_value(), width=75, parent=self.dpg_attribute_id, max_value=self.max, min_value=self.min)
+        self.dpg_input_id = dpg.add_input_int(label=self.get_name(), default_value=self.value, width=75, parent=self.dpg_attribute_id, max_value=self.max, min_value=self.min)

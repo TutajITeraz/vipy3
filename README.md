@@ -28,7 +28,6 @@ Low priority:
 * Node creator / node code editor
 
 Blocked:
-* deleting node should delete all its links (dpg dependent)
 * Create right click menu in node editor
 
 Author: Łukasz Bolda
