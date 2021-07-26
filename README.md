@@ -4,10 +4,9 @@ Visual Python programming tool that supports pytorch, based on node editor provi
 TODO
 ----
 WIP:
-* Meta-node in/out (WIP)
-* Meta-node recursion (WIP)
   
 High (engine) priority:
+* re-wiring nodes
 * color nodes based on execution state and freshness
 * IF node
 * implement visualizers
