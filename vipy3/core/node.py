@@ -248,8 +248,9 @@ class Node:
 
         #TODO delete output links
 
-
         dpg.delete_item(dpg_node_id)
+
+        self.parent_meta_node.delete_node(self.get_uuid())
 
     def dpg_render_node(self):
         print('dpg_render_node')

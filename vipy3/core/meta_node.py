@@ -54,11 +54,16 @@ class MetaNode(Node):
 
     def get_meta_out_nodes(self):
         results = []
-        for node in self.nodes:
-            if node.__class__ == ViMetaOut:
-                results.append(node)
+        for node_uuid in self.nodes:
+            if self.nodes[node_uuid].__class__ == ViMetaOut:
+                results.append(self.nodes[node_uuid])
         return results
 
+    def delete_node(self,node_uuid):
+        if node_uuid in self.nodes:
+            del self.nodes[node_uuid]
+        else:
+            LOG.log('warning','Trying to delete non existing node')
 
     def inside_call(self):
         #Get Out NODE

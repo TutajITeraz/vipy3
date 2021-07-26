@@ -64,9 +64,9 @@ class InConn():
     def connect_to(self):
         pass
 
-    def get_value(self):
+    def get_value(self, calculate=True):
 
-        if self.is_connected():
+        if self.is_connected() and calculate:
             self.value = self.get_connected_node_out().get_value()
         elif hasattr(self,'dpg_input_id') and self.dpg_input_id:
             self.value = dpg.get_value(self.dpg_input_id)
@@ -79,7 +79,8 @@ class InConn():
             return indent+result_prefix + str(dpg.get_value(self.dpg_input_id))
         return ''
 
-    def set_value(self):
+    def set_value(self, value):
+        self.value = value
         return self.value
 
     def get_name(self):
@@ -105,7 +106,7 @@ class InConn():
         state = {}
         state['name']=self.get_name()
         state['class_name'] = self.get_class_name()
-        state['value'] = self.value #not get_value because we do not want to calculate
+        state['value'] = self.get_value(False) #False because we do not want to calculate
         state['uuid'] = self.get_uuid()
         state['type'] = self.type
         return state
@@ -134,7 +135,7 @@ class InConnInt(InConn):
         state = {}
         state['name']=self.get_name()
         state['class_name'] = self.get_class_name()
-        state['value'] = self.value     #should not get value when serialization
+        state['value'] = self.get_value(False)     #should not calculate value when serialization
         state['max'] = self.max
         state['min'] = self.min
         state['uuid'] = self.get_uuid()
