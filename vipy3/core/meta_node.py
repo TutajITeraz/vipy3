@@ -8,6 +8,8 @@ class MetaNode(Node):
         self.parent_workspace = parent_workspace
         self.nodes = {}
         self.dpg_is_rendered = False
+        self.meta_inputs_counter = 0
+        self.meta_outputs_counter = 0
 
         #Main meta node:
         self.should_render_editor = True
@@ -86,13 +88,19 @@ class MetaNode(Node):
             new_node = node_class(parent_meta_node=self, serialized_state=state)
         
             if node_class == ViMetaIn:
-                new_input = InConn(self,'in')
+                self.meta_inputs_counter += 1
+                new_in_name='in'+self.meta_inputs_counter
+                new_input = InConn(self,new_in_name)
+                new_node.set_name(new_in_name)
                 self.inputs.append( new_input )
                 if not state:
                     new_input.dpg_render()
 
             elif node_class == ViMetaOut:
-                new_output = OutConn(self,'out', 'inside_call', type='any')
+                self.meta_outputs_counter += 1
+                new_out_name = 'out'+self.meta_outputs_counter
+                new_node.set_name(new_out_name)
+                new_output = OutConn(self,new_out_name, 'inside_call', type='any')
                 self.outputs.append( new_output )
                 if not state:
                     new_output.dpg_render()
@@ -208,6 +216,8 @@ class MetaNode(Node):
         status = {}
         status['uuid']=self.get_uuid()
         status['name']=self.get_name()
+        status['meta_inputs_counter'] = self.meta_inputs_counter
+        status['meta_outputs_counter']= self.meta_outputs_counter
 
 
         status['dpg_is_rendered'] = self.dpg_is_rendered
@@ -261,6 +271,8 @@ class MetaNode(Node):
     def deserialize(self, status):
         self.uuid = status['uuid']
         self.name = status['name']
+        self.meta_inputs_counter = status['meta_inputs_counter']
+        self.meta_outputs_counter = status['meta_outputs_counter']
 
         self.dpg_is_rendered = status['dpg_is_rendered']
         self.should_render_editor = status['should_render_editor']
