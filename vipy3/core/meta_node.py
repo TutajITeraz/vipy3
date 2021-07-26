@@ -47,7 +47,7 @@ class MetaNode(Node):
     #This function is always called from outside
     def outside_call(self):
         #Get ViMetaOut
-        output = self.get_output_by_name('out')
+        output = self.get_output_by_name('out1')
         result = output.get_value()
 
         print("Meta node outside call:"+str(result))
@@ -88,18 +88,29 @@ class MetaNode(Node):
             new_node = node_class(parent_meta_node=self, serialized_state=state)
         
             if node_class == ViMetaIn:
-                self.meta_inputs_counter += 1
-                new_in_name='in'+self.meta_inputs_counter
+                new_in_name=new_node.get_name()
+                if not state:
+                    self.meta_inputs_counter += 1
+                    new_in_name='in'+str(self.meta_inputs_counter)
+                    new_node.set_name(new_in_name)
+
                 new_input = InConn(self,new_in_name)
-                new_node.set_name(new_in_name)
                 self.inputs.append( new_input )
                 if not state:
                     new_input.dpg_render()
 
             elif node_class == ViMetaOut:
-                self.meta_outputs_counter += 1
-                new_out_name = 'out'+self.meta_outputs_counter
-                new_node.set_name(new_out_name)
+                print ('NEW NOODE CLASS IS META OUT')
+                print ('state is: '+str(state))
+                new_out_name=new_node.get_name()
+                if not state:
+                    print ('new name generation')
+                    self.meta_outputs_counter += 1
+                    new_out_name = 'out'+str(self.meta_outputs_counter)
+                    print ('new_out_name='+new_out_name)
+                    new_node.set_name(new_out_name)
+                
+                print ('Creating OutConn: new_out_name='+new_out_name)
                 new_output = OutConn(self,new_out_name, 'inside_call', type='any')
                 self.outputs.append( new_output )
                 if not state:
