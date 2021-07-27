@@ -38,17 +38,24 @@ class InConn():
         self.connected_node_out = node_out_attr
 
         if node_out_attr is None:
+            if hasattr(self,'dpg_input_id'):
+                dpg.show_item(self.dpg_input_id)
+                dpg.hide_item(self.dpg_text_id)
             return True
 
         if self.get_type() == 'any' or node_out_attr.get_type() == 'any':
-            return True
+            connected = True
         elif self.get_type() == node_out_attr.get_type():
-            return True
+            connected = True
         else:
             self.connected_node_out = None
-            return False
+            connected = False
 
-        return True# TODO Allow connection (check type)
+        if connected and hasattr(self,'dpg_input_id'):
+            dpg.hide_item(self.dpg_input_id)
+            dpg.show_item(self.dpg_text_id)
+
+        return connected# TODO Allow connection (check type)
     
     def is_fresh(self):
         if self.is_connected():
@@ -98,7 +105,7 @@ class InConn():
     def dpg_render(self):
         parent_node_id = self.parent_node.get_dpg_node_id()
         self.dpg_attribute_id = dpg.add_node_attribute(parent=parent_node_id, user_data=self)
-        self.gpg_text_id = dpg.add_text(self.get_name(), parent=self.dpg_attribute_id)
+        self.dpg_text_id = dpg.add_text(self.get_name(), parent=self.dpg_attribute_id)
 
         print(' dpg_attribute_id = '+str(self.dpg_attribute_id))
 
@@ -155,5 +162,6 @@ class InConnInt(InConn):
     def dpg_render(self):
         print('dpg_render in conn int value:'+str(self.value))
         parent_node_id = self.parent_node.get_dpg_node_id()
-        self.dpg_attribute_id = dpg.add_node_attribute(parent=parent_node_id, user_data=self)
+        self.dpg_attribute_id = dpg.add_node_attribute(label='iii',parent=parent_node_id, user_data=self)
         self.dpg_input_id = dpg.add_input_int(label=self.get_name(), default_value=self.value, width=75, parent=self.dpg_attribute_id, max_value=self.max, min_value=self.min)
+        self.dpg_text_id = dpg.add_text(self.get_name(), parent=self.dpg_attribute_id,show=False)
