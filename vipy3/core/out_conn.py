@@ -13,6 +13,9 @@ class OutConn():
 
         if state is not None:
             self.deserialize(state)
+            
+    def __del__(self):
+        print('Destructor of '+self.get_name())
 
     def get_dpg_attribute_id(self):
         return self.dpg_attribute_id

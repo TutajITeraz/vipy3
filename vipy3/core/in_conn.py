@@ -22,6 +22,8 @@ class InConn():
         self.fresh = False
 
         #self.dpg_render()
+    def __del__(self):
+        print('Destructor of '+self.get_name())
 
     def get_dpg_attribute_id(self):
         return self.dpg_attribute_id
