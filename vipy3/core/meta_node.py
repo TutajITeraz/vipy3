@@ -1,6 +1,7 @@
 import dearpygui.dearpygui as dpg
 from . import *
 from vipy3.simple_nodes.meta_in_out import *
+import gc
 
 
 class MetaNode(Node):
@@ -62,7 +63,11 @@ class MetaNode(Node):
         return results
 
     def delete_node(self,node_uuid):
+        print('deleting children node:'+node_uuid)
+        #TODO use weakref.ref() 
         if node_uuid in self.nodes:
+            print('it has '+str(sys.getrefcount(self.nodes[node_uuid]))+' references')
+            print('it has '+str(gc.get_referrers(self.nodes[node_uuid]))+' references')
             del self.nodes[node_uuid]
         else:
             LOG.log('warning','Trying to delete non existing node')
@@ -171,7 +176,7 @@ class MetaNode(Node):
 
     def dpg_render_editor(self):
         position = [50,50]
-        if self.parent_meta_node is not None:
+        if hasattr(self,'parent_meta_node') and self.parent_meta_node:
             position = self.parent_meta_node.dpg_get_window_pos()
             position[0] += 20
             position[1] += 20
@@ -258,7 +263,7 @@ class MetaNode(Node):
             for input in node_inputs:
                 if input.is_connected():
                     output = input.get_connected_node_out()
-                    node_from = output.get_parent_node()
+                    node_from = output.get_parent_node
 
                     link = {}
                     link['from_node_uuid'] = node_from.get_uuid()

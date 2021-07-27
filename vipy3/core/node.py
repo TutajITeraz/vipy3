@@ -3,10 +3,12 @@ import sys
 import inspect
 from . import *
 import os
+import weakref
 
 class Node:
     def __init__(self, parent_meta_node=None, serialized_state=None):
-        self.parent_meta_node = parent_meta_node
+        if parent_meta_node:
+            self.parent_meta_node = weakref.proxy(parent_meta_node)
         self.uuid = gen_uuid()
         self.name = self.get_class_name()
 
@@ -29,11 +31,12 @@ class Node:
         else:
             self.initialize_values()
 
-        print(self.parent_meta_node)
-
-        print('class: '+str(self.get_class_name())+' parent_meta_node:'+str(self.parent_meta_node)+' should_render_node:'+str(self.should_render_node))
-        if self.parent_meta_node and self.should_render_node:
+        print('class: '+str(self.get_class_name())+' should_render_node:'+str(self.should_render_node))
+        if hasattr(self,'parent_meta_node') and self.parent_meta_node and self.should_render_node:
             self.dpg_render_node()
+    
+    def __del__(self):
+        print('Destructor of '+self.get_name())
 
     #TODO set fresh to false when changing any input value
 
@@ -240,21 +243,26 @@ class Node:
         dpg_node_attr_id = dpg.get_item_parent(sender)
         dpg_node_id = dpg.get_item_parent(dpg_node_attr_id)
 
-        dpg_attrs = dpg.get_item_children(dpg_node_id)
-        print(str(dpg_attrs))
-        for dpg_attr_id in dpg_attrs:
-            dpg_attr = dpg_attrs[dpg_attr_id]
-            for real_attr in dpg_attr:
-                dpg_conf = dpg.get_item_configuration(real_attr)
-                print(str(dpg_conf))
+        #dpg_attrs = dpg.get_item_children(dpg_node_id)
+        #print(str(dpg_attrs))
+        #for dpg_attr_id in dpg_attrs:
+        #    dpg_attr = dpg_attrs[dpg_attr_id]
+        #    for real_attr in dpg_attr:
+        #        dpg_conf = dpg.get_item_configuration(real_attr)
+        #        print(str(dpg_conf))
 
         #TODO delete input links
-
         #TODO delete output links
+        del self.inputs[:]
+        del self.outputs[:]
+        #del self.actions[:]
+        #del self.visualizers[:]
 
-        dpg.delete_item(dpg_node_id)
+        print('Delete node callback : '+self.get_name())
 
         self.parent_meta_node.delete_node(self.get_uuid())
+
+        dpg.delete_item(dpg_node_id)
 
     def dpg_render_node(self):
         print('dpg_render_node')

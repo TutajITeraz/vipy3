@@ -1,10 +1,11 @@
 import dearpygui.dearpygui as dpg
 import sys
 from . import *
+import weakref
 
 class OutConn():
     def __init__(self,parent_node,name,value_executor, state=None, type='any'):
-        self.parent_node = parent_node
+        self.parent_node = weakref.proxy(parent_node)
         self.name = name
         self.uuid = gen_uuid()
         self.value_executor = value_executor

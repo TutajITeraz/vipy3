@@ -4,7 +4,6 @@ Visual Python programming tool that supports pytorch, based on node editor provi
 TODO
 ----
 WIP:
-* Hide input when connected
   
 High (engine) priority:
 * re-wiring nodes
