@@ -10,6 +10,8 @@ from .helpers import CodeWindow
 from .in_conn import *
 from .out_conn import *
 
+from .visualizers import *
+
 from .node import Node
 from .meta_node import MetaNode
 from .workspace import Workspace

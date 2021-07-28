@@ -9,9 +9,8 @@ High (engine) priority:
 * re-wiring nodes
 * color nodes based on execution state and freshness
 * IF node
-* implement visualizers
-* hiding input on connection
-* for loop containing actual code
+* in/out labels (not only names)
+* remove "user_data=self"
 
 Medium priority:
 * Closing meta_node and main meta_nodes

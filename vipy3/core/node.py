@@ -15,7 +15,7 @@ class Node:
         self.inputs = []
         self.outputs = []
         self.actions = {'exe_print':'Exe', 'dpg_get_code_callback': 'Gen code'}
-        self.visualizers = {'value':'value_widget'} #TODO implement visualizers
+        self.visualizers = {}
         self.default_executor = ''
         
         self.exe_cache = {}
@@ -120,6 +120,12 @@ class Node:
         
         print('args '+str(args))
 
+        #Visualizers:
+        if exe_func_name in self.visualizers:
+            visualizer = self.visualizers[exe_func_name]
+            visualizer.update(*args)
+
+
         self.exe_cache[exe_func_name] = func_to_call(*args)
 
         self.set_fresh(True)
@@ -199,6 +205,10 @@ class Node:
         for output in self.outputs:
             state['outputs'].append(output.serialize())
 
+        state['visualizers'] = {}
+        for v in self.visualizers:
+            state['visualizers'][v] = self.visualizers[v].serialize()
+
         return state
 
 
@@ -214,6 +224,12 @@ class Node:
 
         for outputState in state['outputs']:
             self.outputs.append( OutConn(self,outputState['name'],None,outputState) )
+
+        for v in state['visualizers']:
+            visualizer = state['visualizers'][v]
+            visualizer_class_name = visualizer['class_name']
+            visualizer_class = getattr(sys.modules[__name__], visualizer_class_name)
+            self.visualizers[v] = visualizer_class(self,visualizer['name'], serialized_state=visualizer )
 
         self.set_position(state['position'])
         self.fresh = False
@@ -276,7 +292,7 @@ class Node:
             input.dpg_render()
 
         for visualizer in self.visualizers: #TODO render visualizers
-            pass
+            self.visualizers[visualizer].dpg_render()
 
         for output in self.outputs:
             output.dpg_render()

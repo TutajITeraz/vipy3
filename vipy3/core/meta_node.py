@@ -263,7 +263,7 @@ class MetaNode(Node):
             for input in node_inputs:
                 if input.is_connected():
                     output = input.get_connected_node_out()
-                    node_from = output.get_parent_node
+                    node_from = output.get_parent_node()
 
                     link = {}
                     link['from_node_uuid'] = node_from.get_uuid()
@@ -287,8 +287,10 @@ class MetaNode(Node):
     def deserialize(self, status):
         self.uuid = status['uuid']
         self.name = status['name']
-        self.meta_inputs_counter = status['meta_inputs_counter']
-        self.meta_outputs_counter = status['meta_outputs_counter']
+        if 'meta_inputs_counter' in status:
+            self.meta_inputs_counter = status['meta_inputs_counter']
+        if 'meta_outputs_counter' in status:
+            self.meta_outputs_counter = status['meta_outputs_counter']
 
         self.dpg_is_rendered = status['dpg_is_rendered']
         self.should_render_editor = status['should_render_editor']
