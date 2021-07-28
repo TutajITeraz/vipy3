@@ -13,5 +13,5 @@ class ViShowText(Node):
 
     def initialize_values(self):
         self.inputs = [ InConn(self,'str_or_val',1,None) ]
-        self.visualizers = {'show_text': ViTextVisualizer(self,'value')}
+        self.visualizers = {'show_text': ViTextVisualizer(self,'value', label='Show Text')}
 

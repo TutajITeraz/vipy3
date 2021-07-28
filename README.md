@@ -9,7 +9,6 @@ High (engine) priority:
 * re-wiring nodes
 * color nodes based on execution state and freshness
 * IF node
-* in/out labels (not only names)
 * remove "user_data=self"
 
 Medium priority:
@@ -18,6 +17,7 @@ Medium priority:
 * Executing meta-node without dpg gui
 * Meta-node generate function code
 * Removing meta node in/outs should remove node attributes too
+* Meta-node input disconnect
 
 Low priority:
 * Save as... dialog
@@ -27,6 +27,7 @@ Low priority:
 * copy-paste nodes
 * MetaNode from selection
 * Node creator / node code editor
+* Node outputs - align to right
 
 Blocked:
 * Create right click menu in node editor
