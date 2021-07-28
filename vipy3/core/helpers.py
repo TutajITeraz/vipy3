@@ -59,6 +59,36 @@ class CodeWindow():
 
         dpg.set_value(self.dpg_result_id, result)
 
+def dpg_create_waiting_node_theme():
+    with dpg.theme(default_theme=False) as theme_id:
+        dpg.add_theme_color(dpg.mvNodeCol_TitleBar, (150, 150, 0, 255), category=dpg.mvThemeCat_Nodes)
+        dpg.add_theme_color(dpg.mvNodeCol_TitleBarHovered, (150, 150, 0, 255), category=dpg.mvThemeCat_Nodes)
+        dpg.add_theme_color(dpg.mvNodeCol_TitleBarSelected, (150, 150, 0, 255), category=dpg.mvThemeCat_Nodes)
+        #dpg.add_theme_color(dpg.mvNodeCol_Pin, (53, 150, 250, 180), category=dpg.mvThemeCat_Nodes)
+
+    return theme_id
+
+def dpg_create_calculating_node_theme():
+    with dpg.theme(default_theme=False) as theme_id:
+        dpg.add_theme_color(dpg.mvNodeCol_TitleBar, (150, 66, 0, 255), category=dpg.mvThemeCat_Nodes)
+        dpg.add_theme_color(dpg.mvNodeCol_TitleBarHovered, (150, 66, 0, 255), category=dpg.mvThemeCat_Nodes)
+        dpg.add_theme_color(dpg.mvNodeCol_TitleBarSelected, (150, 66, 0, 255), category=dpg.mvThemeCat_Nodes)
+
+
+    return theme_id
+
+def dpg_create_done_node_theme():
+    with dpg.theme(default_theme=False) as theme_id:
+        dpg.add_theme_color(dpg.mvNodeCol_TitleBar, (66, 66, 150, 255), category=dpg.mvThemeCat_Nodes)
+        dpg.add_theme_color(dpg.mvNodeCol_TitleBarHovered, (66, 66, 150, 255), category=dpg.mvThemeCat_Nodes)
+        dpg.add_theme_color(dpg.mvNodeCol_TitleBarSelected, (66, 66, 150, 255), category=dpg.mvThemeCat_Nodes)
+
+
+    return theme_id
+
+WAITING_NODE_THEME = dpg_create_waiting_node_theme()
+CALCULATING_NODE_THEME = dpg_create_calculating_node_theme()
+DONE_NODE_THEME = dpg_create_done_node_theme()
 
 
 class Logger():#TODO logger with status bar and popup windows on error

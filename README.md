@@ -7,7 +7,6 @@ WIP:
   
 High (engine) priority:
 * re-wiring nodes
-* color nodes based on execution state and freshness
 * IF node
 * remove "user_data=self"
 
@@ -28,6 +27,7 @@ Low priority:
 * MetaNode from selection
 * Node creator / node code editor
 * Node outputs - align to right
+* Prettier node colors 
 
 Blocked:
 * Create right click menu in node editor

@@ -105,12 +105,14 @@ class Node:
             exe_func_name=self.default_executor
 
         if self.is_fresh() and exe_func_name in self.exe_cache:
+            self.set_stage(3)
             return self.exe_cache[exe_func_name]
 
         func_to_call = getattr(self,exe_func_name)
         params=inspect.signature(func_to_call).parameters
 
         print('try to gather function params:'+str(params))
+        self.set_stage(1)
 
         args = []
         for param in params:
@@ -125,8 +127,9 @@ class Node:
             visualizer = self.visualizers[exe_func_name]
             visualizer.update(*args)
 
-
+        self.set_stage(2)
         self.exe_cache[exe_func_name] = func_to_call(*args)
+        self.set_stage(3)
 
         self.set_fresh(True)
         return self.exe_cache[exe_func_name]
@@ -165,9 +168,24 @@ class Node:
 
         return True
 
+    # 0 = init
+    # 1 = waiting for data
+    # 2 = calculating
+    # 3 = done (fresh)
+    # 4 = not fresh
     def set_stage(self, stage):
         self.stage = stage
-        LOG.log(self.get_name() + "\t changed stage to: " + self.get_stage_name(stage))
+
+        if self.dpg_node_id and stage == 1:
+            dpg.set_item_theme(self.dpg_node_id, WAITING_NODE_THEME)
+
+        elif self.dpg_node_id and stage == 2:
+            dpg.set_item_theme(self.dpg_node_id, CALCULATING_NODE_THEME)
+
+        elif self.dpg_node_id and stage == 3:
+            dpg.set_item_theme(self.dpg_node_id, DONE_NODE_THEME)
+
+        LOG.log(self.get_name() + "\t changed stage to: " + str(stage))
 
     def get_input_by_name(self,name):
         for input in self.inputs:
