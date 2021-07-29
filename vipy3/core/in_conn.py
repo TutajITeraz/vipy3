@@ -87,9 +87,11 @@ class InConn():
 
     def get_code(self, result_prefix='', indent=''):
         if self.is_connected():
-            return self.get_connected_node_out().get_code(result_prefix, indent=indent)
+            connected_out = self.get_connected_node_out()
+            print('connected_out = '+str(connected_out))
+            return connected_out.get_code(result_prefix, indent=indent)
         elif hasattr(self,'dpg_input_id') and self.dpg_input_id:
-            return indent+result_prefix + str(dpg.get_value(self.dpg_input_id))
+            return {'imports_code': '', 'functions_code': '', 'code': indent+result_prefix + str(dpg.get_value(self.dpg_input_id))}
         return ''
 
     def set_value(self, value):

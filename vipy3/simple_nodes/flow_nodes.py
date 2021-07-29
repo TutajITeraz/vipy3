@@ -28,16 +28,26 @@ class ViFor(Node):
 
     def get_code(self, value_executor, result_prefix='', indent=''):
         if(value_executor=='get_iter'):
-            return result_prefix +' '+self.get_name()+'_'+'iter'
+            return {'imports_code': '', 'functions_code': '', 'code': result_prefix +' '+self.get_name()+'_'+'iter'}
 
-        code =''
+        code = ''
+        imports_code = ''
+        functions_code = ''
+        
         param = 'how_many'
         input_code = self._get_input_code(param, self.get_name()+'_'+param + ' = ')
-        code += input_code + '\n'
+        code += input_code['code'] + '\n'
+        imports_code += input_code['imports_code']
+        functions_code += input_code['functions_code']
+
         code += self.get_name()+'_'+'results = []\n'
         code+='for '+self.get_name()+'_'+'iter in range('+self.get_name()+'_'+param+'):'+'\n'
-        code+=self._get_input_code('data', self.get_name()+'_'+str('data') + ' = ',indent='    ')+'\n'
-        code+='    '+self.get_name()+'_'+'results.append('+self.get_name()+'_'+'data)\n'
+
+        param = 'data'
+        input_code = self._get_input_code(param, self.get_name()+'_'+str('data') + ' = ',indent='    ')
+        code += input_code['code'] + '\n'
+        imports_code += input_code['imports_code']
+        functions_code += input_code['functions_code']
 
         if result_prefix != '':
             code+=result_prefix+' '+self.get_name()+'_'+'results\n'
@@ -49,4 +59,4 @@ class ViFor(Node):
         for line in code.splitlines():
             indent_code += indent+line+'\n'
 
-        return indent_code
+        return {'imports_code': imports_code, 'functions_code': functions_code, 'code': indent_code}

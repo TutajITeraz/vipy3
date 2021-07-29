@@ -14,6 +14,9 @@ class ViMetaIn(Node):
         value = self.parent_meta_node.get_input_value(self.get_name())
         return value
 
+    def get_code(self, value_executor, result_prefix='', indent=''):
+        code = indent+result_prefix+self.get_name()
+        return {'imports_code': '', 'functions_code': '', 'code': code}
 
 
 class ViMetaOut(Node):

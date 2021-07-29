@@ -42,11 +42,15 @@ class Node:
 
     def dpg_get_code_callback(self):
         code = self.get_code(self.default_executor)
+        full_code = code['imports_code'] + '\n' + code['functions_code']+ '\n' + code['code']
         #print(code)
-        cw = CodeWindow(code)
+        cw = CodeWindow(full_code)
     
     def get_code(self, value_executor, result_prefix='', indent=''):
         code = ''
+        imports_code = ''
+        functions_code = ''
+
         print('value_executor: ', str(value_executor))
 
         func_to_call = getattr(self,value_executor)
@@ -54,43 +58,49 @@ class Node:
 
         for param in params:
             input_code = self._get_input_code(param, self.get_name()+'_'+str(param) + ' = ')
-            code += input_code + '\n'
+            code += input_code['code'] + '\n'
+            imports_code += input_code['imports_code']
+            functions_code += input_code['functions_code']
 
         script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
         rel_path = "../simple_nodes/"
         abs_file_path = os.path.join(script_dir, rel_path)
 
-        f = open(abs_file_path+"/_"+value_executor+".py", "r")
-        #code_file = f.read()
-        for line in f:
-            if not 'def' in line:
-                print('line ======> '+line)
-                if line[0]==' ':
-                    line = line.lstrip()
+        if value_executor != 'bypass':
+            f = open(abs_file_path+"/_"+value_executor+".py", "r")
+            #code_file = f.read()
+            for line in f:
+                if not 'def' in line:
+                    print('line ======> '+line)
+                    if line[0]==' ':
+                        line = line.lstrip()
 
-                if not 'return' in line:
-                    for param in params:
-                        line = line.replace(param, self.get_name()+'_'+param)
-                    code+=line 
-                elif result_prefix != '':
-                    print('line ======> (1) '+line)
-                    result_line = line.replace("return ", result_prefix)
-                    print('line ======> (1 result) '+result_line)
-                    code+=result_line
-                else:
-                    print('line ======> (2) '+line)
-                    result_line = line.replace("return ", "print( ") + " )"
-                    print('line ======> (2 result) '+result_line)
-                    code+=result_line
+                    if not 'return' in line:
+                        for param in params:
+                            line = line.replace(param, self.get_name()+'_'+param)
+                        code+=line 
+                    elif result_prefix != '':
+                        print('line ======> (1) '+line)
+                        result_line = line.replace("return ", result_prefix)
+                        print('line ======> (1 result) '+result_line)
+                        code+=result_line
+                    else:
+                        print('line ======> (2) '+line)
+                        result_line = line.replace("return ", "print( ") + " )"
+                        print('line ======> (2 result) '+result_line)
+                        code+=result_line
 
-        f.close()
+            f.close()
+        else:
+            for param in params:
+                code += result_prefix+self.get_name()+'_'+param
 
         #Add indentation:
         indent_code = ''
         for line in code.splitlines():
             indent_code += indent+line+'\n'
 
-        return indent_code
+        return {'imports_code': imports_code, 'functions_code': functions_code, 'code': indent_code}
 
     def _get_input_code(self, input_name, result_prefix='', indent=''):
         input = self.get_input_by_name(input_name)

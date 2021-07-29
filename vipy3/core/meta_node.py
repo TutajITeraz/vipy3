@@ -2,7 +2,7 @@ import dearpygui.dearpygui as dpg
 from . import *
 from vipy3.simple_nodes.meta_in_out import *
 import gc
-
+import inspect
 
 class MetaNode(Node):
     def __init__(self,  parent_meta_node=None, serialized_state='', parent_workspace=None):
@@ -83,6 +83,68 @@ class MetaNode(Node):
 
         return None
     
+
+    def get_code(self, value_executor, result_prefix='', indent=''):
+        code = ''
+        imports_code = ''
+        functions_code = 'def '+self.get_name()+'('
+        i=0
+        for input in self.get_all_inputs():
+            if i!=0:
+                functions_code += ','
+            i+=1
+            functions_code += input.get_name()
+
+        functions_code+='):\n'
+
+        print('value_executor: ', str(value_executor))
+
+        func_to_call = getattr(self,value_executor)
+        params = inspect.signature(func_to_call).parameters
+
+        for input in self.get_all_inputs():
+            param = input.get_name()
+            input_code = self._get_input_code(param, self.get_name()+'_'+str(param) + ' = ')
+            imports_code += input_code['imports_code']
+            functions_code += input_code['functions_code'] + '\n'
+            code += input_code['code'] + '\n'
+
+        #Function call:
+        if result_prefix != '':
+            code += result_prefix + self.get_name()+'('
+        else:
+            code += 'print( ' + self.get_name()+'('
+        i=0
+        for input in self.get_all_inputs():
+            if i!=0:
+                code += ','
+            i+=1
+            code += self.get_name()+'_'+input.get_name()
+
+        if result_prefix == '':
+            code += ')'
+        code += ')\n'
+
+
+
+        #Actual function body:
+
+        out_nodes = self.get_meta_out_nodes()
+        for n in out_nodes:
+            all_code = n.get_code('bypass', result_prefix='return ', indent=indent+'    ')
+            functions_code += all_code['code']
+            imports_code += all_code['imports_code']
+            functions_code += all_code['functions_code']
+
+
+        #Add indentation:
+        indent_code = ''
+        for line in code.splitlines():
+            indent_code += indent+line+'\n'
+
+        return {'imports_code': imports_code, 'functions_code': functions_code, 'code': indent_code}
+
+
     def add_node_to_editor(self, node_class, state=None):
         LOG.log('add_node_to_editor: '+str(node_class))
 
