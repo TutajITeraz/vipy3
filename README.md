@@ -8,7 +8,6 @@ WIP:
 High (engine) priority:
 * re-wiring nodes
 * IF node
-* remove "user_data=self"
 
 Medium priority:
 * Closing meta_node and main meta_nodes
@@ -17,6 +16,7 @@ Medium priority:
 * Meta-node generate function code
 * Removing meta node in/outs should remove node attributes too
 * Meta-node input disconnect
+* For should have optional code processing too
 
 Low priority:
 * Save as... dialog

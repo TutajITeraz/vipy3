@@ -50,7 +50,7 @@ class ViVisualizer():
 
     def dpg_render(self):
         parent_node_id = self.parent_node.get_dpg_node_id()
-        self.dpg_attribute_id = dpg.add_node_attribute(label=self.get_label(), parent=parent_node_id, user_data=self, attribute_type=dpg.mvNode_Attr_Static)
+        self.dpg_attribute_id = dpg.add_node_attribute(label=self.get_label(), parent=parent_node_id, user_data=weakref.proxy(self), attribute_type=dpg.mvNode_Attr_Static)
         pass
 
 
@@ -78,7 +78,7 @@ class ViTextVisualizer(ViVisualizer):
         print('render visualizer: '+self.get_name())
 
         parent_node_id = self.parent_node.get_dpg_node_id()
-        self.dpg_attribute_id = dpg.add_node_attribute(label=self.get_label(), parent=parent_node_id, user_data=self, attribute_type=dpg.mvNode_Attr_Static)
+        self.dpg_attribute_id = dpg.add_node_attribute(label=self.get_label(), parent=parent_node_id, user_data=weakref.proxy(self), attribute_type=dpg.mvNode_Attr_Static)
         self.dpg_text_id = dpg.add_text(self.get_label(), parent=self.dpg_attribute_id)
 
     def update(self, str_or_val):

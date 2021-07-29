@@ -110,7 +110,7 @@ class InConn():
 
     def dpg_render(self):
         parent_node_id = self.parent_node.get_dpg_node_id()
-        self.dpg_attribute_id = dpg.add_node_attribute(parent=parent_node_id, user_data=self)
+        self.dpg_attribute_id = dpg.add_node_attribute(parent=parent_node_id, user_data=weakref.proxy(self))
         self.dpg_text_id = dpg.add_text(self.get_label(), parent=self.dpg_attribute_id)
 
         print(' dpg_attribute_id = '+str(self.dpg_attribute_id))
@@ -176,6 +176,6 @@ class InConnInt(InConn):
     def dpg_render(self):
         print('dpg_render in conn int value:'+str(self.value))
         parent_node_id = self.parent_node.get_dpg_node_id()
-        self.dpg_attribute_id = dpg.add_node_attribute(label='iii',parent=parent_node_id, user_data=self)
+        self.dpg_attribute_id = dpg.add_node_attribute(label='iii',parent=parent_node_id, user_data=weakref.proxy(self))
         self.dpg_input_id = dpg.add_input_int(label=self.get_label(), default_value=self.value, width=75, parent=self.dpg_attribute_id, max_value=self.max, min_value=self.min)
         self.dpg_text_id = dpg.add_text(self.get_label(), parent=self.dpg_attribute_id,show=False)
