@@ -75,9 +75,9 @@ class Node:
                     if line[0]==' ':
                         line = line.lstrip()
 
+                    for param in params:
+                        line = line.replace(param, self.get_name()+'_'+param)
                     if not 'return' in line:
-                        for param in params:
-                            line = line.replace(param, self.get_name()+'_'+param)
                         code+=line 
                     elif result_prefix != '':
                         print('line ======> (1) '+line)
