@@ -283,9 +283,16 @@ class Node:
         self.name = name
         dpg.set_item_label(self.dpg_node_id,self.name)
 
+    def unbind_methods(self):
+        pass
+
     def dpg_delete_callback(self,sender,app_data,user_data):
+        print('node dpg delete callback')
         dpg_node_attr_id = dpg.get_item_parent(sender)
         dpg_node_id = dpg.get_item_parent(dpg_node_attr_id)
+
+        dpg_conf = dpg.get_item_configuration(dpg_node_id)
+        print(str(dpg_conf))
 
         #dpg_attrs = dpg.get_item_children(dpg_node_id)
         #print(str(dpg_attrs))
@@ -301,6 +308,8 @@ class Node:
         del self.outputs[:]
         #del self.actions[:]
         #del self.visualizers[:]
+
+        self.unbind_methods()
 
         print('Delete node callback : '+self.get_name())
 
@@ -326,7 +335,10 @@ class Node:
             output.dpg_render()
 
         self.fake_action_attribute_id = dpg.add_node_attribute(parent=self.dpg_node_id, attribute_type=dpg.mvNode_Attr_Static)
-        dpg.add_button(label='x', callback=self.dpg_delete_callback, parent=self.fake_action_attribute_id)
+
+        #weak_dpg_delete_callback = weakref.WeakMethod(self.dpg_delete_callback)
+
+        dpg.add_button(label='x', callback=(lambda a,b,c: self.dpg_delete_callback(a,b,c)), parent=self.fake_action_attribute_id)
         dpg.add_same_line(parent=self.fake_action_attribute_id)
         self.dpg_edit_button_id = dpg.add_button(label='edit', parent=self.fake_action_attribute_id)
 
@@ -343,7 +355,7 @@ class Node:
 
         for action in self.actions:
             dpg.add_same_line(parent=self.fake_action_attribute_id)
-            dpg.add_button(label=self.actions[action], callback=self.dpg_action_callback, user_data=action, parent=self.fake_action_attribute_id)
+            dpg.add_button(label=self.actions[action], callback=(lambda a,b,c: self.dpg_action_callback(a,b,c)), user_data=action, parent=self.fake_action_attribute_id)
 
     def get_class_name(self):
         return type(self).__name__

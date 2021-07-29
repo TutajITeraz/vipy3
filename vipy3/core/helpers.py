@@ -30,6 +30,9 @@ def gen_uuid():
     return shortuuid.uuid()
     #return uuid.uuid1()
 
+def namestr(obj, namespace):
+    return [name for name in namespace if namespace[name] is obj]
+
 class CodeWindow():
     def __init__(self,code=''):
         self.code = code
@@ -150,6 +153,8 @@ def load_data(filepath=DEFAULT_WORKSPACE_SAVE_PATH):
     data = pickle.load(infile)
     infile.close()
     return data
+
+
 
 LOG = Logger()
 LOG.log('test1')

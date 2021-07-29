@@ -7,6 +7,7 @@ from .helpers import DEFAULT_FOLDER
 from .helpers import WAITING_NODE_THEME
 from .helpers import CALCULATING_NODE_THEME
 from .helpers import DONE_NODE_THEME
+from .helpers import namestr
 from .helpers import LOG
 from .helpers import CodeWindow
 

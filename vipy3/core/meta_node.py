@@ -66,9 +66,16 @@ class MetaNode(Node):
         print('deleting children node:'+node_uuid)
         #TODO use weakref.ref() 
         if node_uuid in self.nodes:
-            print('it has '+str(sys.getrefcount(self.nodes[node_uuid]))+' references')
-            print('it has '+str(gc.get_referrers(self.nodes[node_uuid]))+' references')
+            node = self.nodes[node_uuid]
+
             del self.nodes[node_uuid]
+
+            gc.collect()
+            print('it has '+str(sys.getrefcount(node))+' references')
+            refs = gc.get_referrers(node)
+            for r in refs:
+                print('ref: '+str(r))
+
         else:
             LOG.log('warning','Trying to delete non existing node')
 
@@ -277,7 +284,7 @@ class MetaNode(Node):
                 if nodes[n] is not None:
                     print('nodes[n]'+ str(nodes[n]))
 
-                    menu_item_id = dpg.add_menu_item(label=n, parent=dpg_parent, callback=self.add_node_callback, user_data={'node_class': nodes[n]})
+                    menu_item_id = dpg.add_menu_item(label=n, parent=dpg_parent, callback=(lambda a,b,c: self.add_node_callback(a,b,c)), user_data={'node_class': nodes[n]})
                 else:
                     menu_item_id = dpg.add_menu_item(label=n, parent=dpg_parent)
 
