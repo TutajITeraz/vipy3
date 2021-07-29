@@ -13,7 +13,6 @@ Medium priority:
 * Closing meta_node and main meta_nodes
 * Removing nodes should del objects
 * Executing meta-node without dpg gui
-* Meta-node generate function code
 * Removing meta node in/outs should remove node attributes too
 * Meta-node input disconnect
 * For should have optional code processing too
