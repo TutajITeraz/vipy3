@@ -131,7 +131,7 @@ class MetaNode(Node):
 
         out_nodes = self.get_meta_out_nodes()
         for n in out_nodes:
-            all_code = n.get_code('bypass', result_prefix='return ', indent=indent+'    ')
+            all_code = n.get_code('bypass', result_prefix='return ', indent='    ')
             functions_code += all_code['code']
             imports_code += all_code['imports_code']
             functions_code += all_code['functions_code']

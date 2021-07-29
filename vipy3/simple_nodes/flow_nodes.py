@@ -44,10 +44,12 @@ class ViFor(Node):
         code+='for '+self.get_name()+'_'+'iter in range('+self.get_name()+'_'+param+'):'+'\n'
 
         param = 'data'
-        input_code = self._get_input_code(param, self.get_name()+'_'+str('data') + ' = ',indent='    ')
+        input_code = self._get_input_code(param, self.get_name()+'_'+'data' + ' = ',indent='    ')
         code += input_code['code'] + '\n'
         imports_code += input_code['imports_code']
         functions_code += input_code['functions_code']
+
+        code+='    '+self.get_name()+'_'+'results.append('+self.get_name()+'_'+'data'+')\n'
 
         if result_prefix != '':
             code+=result_prefix+' '+self.get_name()+'_'+'results\n'
