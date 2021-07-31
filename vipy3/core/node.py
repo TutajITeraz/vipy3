@@ -4,6 +4,7 @@ import inspect
 from . import *
 import os
 import weakref
+import gc
 
 class Node:
     def __init__(self, parent_meta_node=None, serialized_state=None):
@@ -320,6 +321,11 @@ class Node:
     def dpg_render_node(self):
         print('dpg_render_node')
 
+        print('pre render node has ' + str(sys.getrefcount(self)) + ' references')
+        refs = gc.get_referrers(self)
+        for r in refs:
+            print('ref: ' + str(r))
+
         self.dpg_node_id = dpg.add_node(label = self.get_name(), pos=self.get_position(), parent=self.parent_meta_node.dpg_get_node_editor_id(), user_data={'node_uuid': self.get_uuid()})
 
         print(' dpg_node_id = '+str(self.dpg_node_id))
@@ -357,5 +363,10 @@ class Node:
             dpg.add_same_line(parent=self.fake_action_attribute_id)
             dpg.add_button(label=self.actions[action], callback=(lambda a,b,c: self.dpg_action_callback(a,b,c)), user_data=action, parent=self.fake_action_attribute_id)
 
+
+        print('post render node has ' + str(sys.getrefcount(self)) + ' references')
+        refs = gc.get_referrers(self)
+        for r in refs:
+            print('ref: ' + str(r))
     def get_class_name(self):
         return type(self).__name__

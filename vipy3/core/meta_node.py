@@ -76,6 +76,8 @@ class MetaNode(Node):
             for r in refs:
                 print('ref: '+str(r))
 
+            del node
+
         else:
             LOG.log('warning','Trying to delete non existing node')
 
