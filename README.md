@@ -7,6 +7,7 @@ WIP:
   
 High (engine) priority:
 * re-wiring nodes
+* Changing meta-node input fresshness check
 * IF node
 
 Medium priority:
@@ -15,7 +16,8 @@ Medium priority:
 * Executing meta-node without dpg gui
 * Removing meta node in/outs should remove node attributes too
 * Meta-node input disconnect
-* For should have optional code processing too
+* For last result output and recurency
+
 
 Low priority:
 * Save as... dialog
@@ -27,6 +29,7 @@ Low priority:
 * Node creator / node code editor
 * Node outputs - align to right
 * Prettier node colors 
+* Smaller nodes style
 
 Blocked:
 * Create right click menu in node editor

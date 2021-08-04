@@ -74,7 +74,8 @@ class Node:
                 if not 'def' in line:
                     print('line ======> '+line)
                     if line[0]==' ':
-                        line = line.lstrip()
+                        #line = line.lstrip()
+                        line = line[4:]
 
                     for param in params:
                         line = line.replace(param, self.get_name()+'_'+param)
@@ -169,6 +170,9 @@ class Node:
         return input.get_value()
 
     def is_fresh(self):
+        if self.stage == 1 or self.stage == 2 : #during calculation (used by loop)
+            return True
+
         if not self.fresh:
             return False
         
