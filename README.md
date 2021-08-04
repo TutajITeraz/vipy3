@@ -7,7 +7,6 @@ WIP:
   
 High (engine) priority:
 * re-wiring nodes
-* Changing meta-node input fresshness check
 * IF node
 
 Medium priority:
@@ -17,6 +16,7 @@ Medium priority:
 * Removing meta node in/outs should remove node attributes too
 * Meta-node input disconnect
 * For last result output and recurency
+* replace lambda a,b,c with proper solution
 
 
 Low priority:

@@ -18,6 +18,10 @@ class ViMetaIn(Node):
         code = indent+result_prefix+self.get_name()
         return {'imports_code': '', 'functions_code': '', 'code': code}
 
+    def is_fresh(self):
+        real_input = self.parent_meta_node.get_input_by_name(self.get_name())
+        return real_input.is_fresh()
+
 
 class ViMetaOut(Node):
     def __init__(self, parent_meta_node=None, serialized_state=None):

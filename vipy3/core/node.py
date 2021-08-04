@@ -117,6 +117,7 @@ class Node:
             exe_func_name=self.default_executor
 
         if self.is_fresh() and exe_func_name in self.exe_cache:
+            print(self.get_name()+' node is fresh and returning cached value:'+str(self.exe_cache[exe_func_name]))
             self.set_stage(3)
             return self.exe_cache[exe_func_name]
 
@@ -128,11 +129,11 @@ class Node:
 
         args = []
         for param in params:
-            print('get '+str(param))
+            #print('get '+str(param))
             value = self.get_input_value(param)
             args.append(value)
         
-        print('args '+str(args))
+        #print('args '+str(args))
 
         #Visualizers:
         if exe_func_name in self.visualizers:
@@ -142,6 +143,9 @@ class Node:
         self.set_stage(2)
         self.exe_cache[exe_func_name] = func_to_call(*args)
         self.set_stage(3)
+
+        print(self.get_name() + ' node is not fresh, so calculated value is:' + str(self.exe_cache[exe_func_name]))
+
 
         self.set_fresh(True)
         return self.exe_cache[exe_func_name]
@@ -170,16 +174,18 @@ class Node:
         return input.get_value()
 
     def is_fresh(self):
-        if self.stage == 1 or self.stage == 2 : #during calculation (used by loop)
-            return True
+        #if self.stage == 1 or self.stage == 2 : #during calculation (used by loop)
+        #    return True
 
         if not self.fresh:
             return False
         
         for input in self.inputs:
-            print('checking freshness of node '+str(input))
+            print(self.get_name()+' is checking freshness of node input '+str(input.get_name()))
             if input.is_fresh() == False:
+                print('    is NOT fresh')
                 return False
+            print('    is fresh')
 
         return True
 

@@ -64,9 +64,11 @@ class InConn():
         return connected# TODO Allow connection (check type)
     
     def is_fresh(self):
+        #print('in connection is checking freshness: ')
         if self.is_connected():
-            return self.connected_node_out.is_fresh()
+            self.fresh = self.connected_node_out.is_fresh()
 
+        #print('in connection is: '+str(self.fresh))
         return self.fresh
 
     def is_connected(self):
@@ -83,6 +85,9 @@ class InConn():
             self.value = self.get_connected_node_out().get_value()
         elif hasattr(self,'dpg_input_id') and self.dpg_input_id:
             self.value = dpg.get_value(self.dpg_input_id)
+
+        self.fresh = True
+
         return self.value
 
     def get_code(self, result_prefix='', indent=''):
@@ -109,6 +114,9 @@ class InConn():
 
     def dpg_get_attribute_id(self):
         return self.dpg_attribute_id
+
+    def dpg_val_change_callback(self,sender,app_data,user_data):
+        self.fresh = False
 
     def dpg_render(self):
         parent_node_id = self.parent_node.get_dpg_node_id()
@@ -179,5 +187,5 @@ class InConnInt(InConn):
         print('dpg_render in conn int value:'+str(self.value))
         parent_node_id = self.parent_node.get_dpg_node_id()
         self.dpg_attribute_id = dpg.add_node_attribute(label='iii',parent=parent_node_id, user_data=weakref.proxy(self))
-        self.dpg_input_id = dpg.add_input_int(label=self.get_label(), default_value=self.value, width=75, parent=self.dpg_attribute_id, max_value=self.max, min_value=self.min)
+        self.dpg_input_id = dpg.add_input_int(label=self.get_label(), default_value=self.value, width=75, parent=self.dpg_attribute_id, max_value=self.max, min_value=self.min, callback=lambda a,b,c: self.dpg_val_change_callback(a,b,c) )
         self.dpg_text_id = dpg.add_text(self.get_label(), parent=self.dpg_attribute_id,show=False)
