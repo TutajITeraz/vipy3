@@ -116,21 +116,27 @@ class ViIf(Node):
         imports_code = ''
         functions_code = ''
         
-        param = 'how_many'
+        param = 'condition'
         input_code = self._get_input_code(param, self.get_name()+'_'+param + ' = ')
         code += input_code['code'] + '\n'
         imports_code += input_code['imports_code']
         functions_code += input_code['functions_code']
 
-        code += self.get_name()+'_'+'results = []\n'
-        code+='for '+self.get_name()+'_'+'iter in range('+self.get_name()+'_'+param+'):'+'\n'
+        code+='if '+self.get_name()+'_'+param+':'+'\n'
 
-        inner_loop_code = super().get_code('for_exe',self.get_name()+'_last_result = ','    ')
-        code += inner_loop_code['code'] + '\n'
-        imports_code += inner_loop_code['imports_code']
-        functions_code += inner_loop_code['functions_code']
+        param = 'data_if_true'
+        input_code = self._get_input_code(param, self.get_name()+'_'+'results' + ' = ','    ')
+        code += input_code['code'] + '\n'
+        imports_code += input_code['imports_code']
+        functions_code += input_code['functions_code']
 
-        code+='    '+self.get_name()+'_'+'results.append('+self.get_name()+'_'+'last_result'+')\n'
+        code+='else:'+'\n'
+
+        param = 'data_if_false'
+        input_code = self._get_input_code(param, self.get_name()+'_'+'results' + ' = ','    ')
+        code += input_code['code'] + '\n'
+        imports_code += input_code['imports_code']
+        functions_code += input_code['functions_code']
 
         if result_prefix != '':
             code+=result_prefix+' '+self.get_name()+'_'+'results\n'

@@ -193,7 +193,7 @@ class InConnInt(InConn):
 
 
 class InConnBool(InConn):
-    def __init__(self,parent_node,name='',default_value=None,serialized_state=None, label=''):
+    def __init__(self,parent_node,name='',default_value=True,serialized_state=None, label=''):
         type = 'number'
         super().__init__(parent_node,name,default_value,serialized_state,type,label)
 
@@ -205,5 +205,5 @@ class InConnBool(InConn):
         parent_node_id = self.parent_node.get_dpg_node_id()
         self.dpg_attribute_id = dpg.add_node_attribute(parent=parent_node_id, user_data=weakref.proxy(self))
         ###
-        self.dpg_input_id = dpg.add_checkbox(label=self.get_label(),  default_value=self.value, width=75, parent=self.dpg_attribute_id, callback=lambda a,b,c: self.dpg_val_change_callback(a,b,c))
+        self.dpg_input_id = dpg.add_checkbox(label=self.get_label(),  default_value=self.value, parent=self.dpg_attribute_id, callback=lambda a,b,c: self.dpg_val_change_callback(a,b,c))
         self.dpg_text_id = dpg.add_text(self.get_label(), parent=self.dpg_attribute_id,show=False)
