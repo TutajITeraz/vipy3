@@ -6,8 +6,8 @@ TODO
 WIP:
   
 High (engine) priority:
-* re-wiring nodes
 * IF node
+* add nodes to workspace by themselves
 
 Medium priority:
 * Closing meta_node and main meta_nodes
@@ -33,5 +33,6 @@ Low priority:
 
 Blocked:
 * Create right click menu in node editor
+* re-wiring nodes
 
 Author: Łukasz Bolda

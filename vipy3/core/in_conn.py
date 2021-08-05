@@ -186,6 +186,24 @@ class InConnInt(InConn):
     def dpg_render(self):
         print('dpg_render in conn int value:'+str(self.value))
         parent_node_id = self.parent_node.get_dpg_node_id()
-        self.dpg_attribute_id = dpg.add_node_attribute(label='iii',parent=parent_node_id, user_data=weakref.proxy(self))
+        self.dpg_attribute_id = dpg.add_node_attribute(parent=parent_node_id, user_data=weakref.proxy(self))
         self.dpg_input_id = dpg.add_input_int(label=self.get_label(), default_value=self.value, width=75, parent=self.dpg_attribute_id, max_value=self.max, min_value=self.min, callback=lambda a,b,c: self.dpg_val_change_callback(a,b,c) )
+        self.dpg_text_id = dpg.add_text(self.get_label(), parent=self.dpg_attribute_id,show=False)
+
+
+
+class InConnBool(InConn):
+    def __init__(self,parent_node,name='',default_value=None,serialized_state=None, label=''):
+        type = 'number'
+        super().__init__(parent_node,name,default_value,serialized_state,type,label)
+
+        if serialized_state is not None:
+            self.deserialize(serialized_state)
+
+    def dpg_render(self):
+        print('dpg_render in conn int value:'+str(self.value))
+        parent_node_id = self.parent_node.get_dpg_node_id()
+        self.dpg_attribute_id = dpg.add_node_attribute(parent=parent_node_id, user_data=weakref.proxy(self))
+        ###
+        self.dpg_input_id = dpg.add_checkbox(label=self.get_label(),  default_value=self.value, width=75, parent=self.dpg_attribute_id, callback=lambda a,b,c: self.dpg_val_change_callback(a,b,c))
         self.dpg_text_id = dpg.add_text(self.get_label(), parent=self.dpg_attribute_id,show=False)

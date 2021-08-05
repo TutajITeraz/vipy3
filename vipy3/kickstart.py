@@ -11,7 +11,7 @@ dpg.set_viewport_height(600)
 dpg.set_viewport_pos([1,1])
 
 WORKSPACE = Workspace()
-nodes_available = {'math': {'add': ViAdd, 'advanced': {'sqrt': None}}, 'flow': {'for': ViFor}, 'meta':{'meta_node': MetaNode, 'input': ViMetaIn, 'output': ViMetaOut}, 'visualize': {'show text': ViShowText} }
+nodes_available = {'math': {'add': ViAdd, 'advanced': {'sqrt': None}}, 'flow': {'for': ViFor, 'if': ViIf}, 'meta':{'meta_node': MetaNode, 'input': ViMetaIn, 'output': ViMetaOut}, 'visualize': {'show text': ViShowText} }
 WORKSPACE.add_nodes_available(nodes_available)
 
 DPG_PRIMARY_WINDOW_ID = dpg.add_window(label="vipy3", width=800, height=800, pos=(100, 100) )
