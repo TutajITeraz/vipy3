@@ -6,8 +6,6 @@ TODO
 WIP:
   
 High (engine) priority:
-* IF node
-* add nodes to workspace by themselves
 
 Medium priority:
 * Closing meta_node and main meta_nodes
@@ -17,7 +15,9 @@ Medium priority:
 * Meta-node input disconnect
 * For last result output and recurency
 * replace lambda a,b,c with proper solution
-
+* Specify function types and return types
+* add nodes to workspace by themselves
+* Documentation and private methods
 
 Low priority:
 * Save as... dialog
@@ -28,8 +28,9 @@ Low priority:
 * MetaNode from selection
 * Node creator / node code editor
 * Node outputs - align to right
-* Prettier node colors 
+* Prettier node colors
 * Smaller nodes style
+* Attrs colors based on type
 
 Blocked:
 * Create right click menu in node editor
