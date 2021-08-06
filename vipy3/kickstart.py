@@ -20,11 +20,13 @@ dpg_workspace_menu_id = dpg.add_menu(label='Workspace', parent=dpg_menu_bar_id)
 
 #dpg.add_menu_item(label='New Workspace', parent=dpg_workspace_menu_id)#TODO new workspace
 dpg.add_menu_item(label='Load Last Workspace', parent=dpg_workspace_menu_id,callback=WORKSPACE.dpg_load_status_from_file_callback)
-#dpg.add_menu_item(label='Load Workspace...', parent=dpg_workspace_menu_id)#TODO load workspace
+dpg.add_menu_item(label='Load Workspace...', parent=dpg_workspace_menu_id, callback=WORKSPACE.dpg_load_workspace_callback)#TODO load workspace
 dpg.add_menu_item(label='Save Workspace', parent=dpg_workspace_menu_id, callback=WORKSPACE.dpg_save_status_to_file_callback)
-#dpg.add_menu_item(label='Save Workspace As...', parent=dpg_workspace_menu_id)#TODO save as workspace
+dpg.add_menu_item(label='Save Workspace As...', parent=dpg_workspace_menu_id, callback=WORKSPACE.dpg_save_workspace_as_callback)#TODO save as workspace
 dpg.add_menu_item(label='New MetaNode', parent=dpg_workspace_menu_id, callback=WORKSPACE.new_meta_node_callback)#TODO new MetaNode
 #dpg.add_menu_item(label='Load MetaNode', parent=dpg_workspace_menu_id)#TODO load MetaNode
+
+
 
 
 dpg_debug_menu = dpg.add_menu(label='Debug', parent=dpg_menu_bar_id)

@@ -37,6 +37,30 @@ class Workspace:
 
     def dpg_save_status_to_file_callback(self, param):
         self.save_status_to_file(self.filepath)
+
+    def dpg_save_callback(self, sender, app_data, user_data):
+        print('sender'+str(sender))
+        print('app_data'+str(app_data))
+        print('user_data'+str(user_data))
+
+        self.save_status_to_file(app_data['file_path_name'])
+
+    def dpg_load_callback(self, sender, app_data, user_data):
+        print('sender'+str(sender))
+        print('app_data'+str(app_data))
+        print('user_data'+str(user_data))
+
+        self.load_status_from_file(app_data['file_path_name'])
+
+    def dpg_save_workspace_as_callback(self, sender, app_data, user_data):
+        self.dpg_file_dialog_id = dpg.add_file_dialog(label='Save Workspace', callback=lambda s, a, u : self.dpg_save_callback(s, a, u))
+        #dpg.add_file_extension(".*", color=(255, 255, 255, 255), parent=self.dpg_file_dialog_id)
+        dpg.add_file_extension(".viw", color=(0, 255, 255, 255), parent=self.dpg_file_dialog_id)
+
+    def dpg_load_workspace_callback(self, sender, app_data, user_data):
+        self.dpg_file_dialog_id = dpg.add_file_dialog(label='Load Workspace', callback=lambda s, a, u : self.dpg_load_callback(s, a, u))
+        #dpg.add_file_extension(".*", color=(255, 255, 255, 255), parent=self.dpg_file_dialog_id)
+        dpg.add_file_extension(".viw", color=(0, 255, 255, 255), parent=self.dpg_file_dialog_id)
         
     def dpg_load_status_from_file_callback(self, param):
         self.load_status_from_file()

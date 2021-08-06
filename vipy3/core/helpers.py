@@ -24,7 +24,7 @@ def stdoutIO(stdout=None):
 
 
 DEFAULT_FOLDER='~/pydata/'
-DEFAULT_WORKSPACE_SAVE_PATH = DEFAULT_FOLDER + 'default.viworkspace'
+DEFAULT_WORKSPACE_SAVE_PATH = DEFAULT_FOLDER + 'default.viw'
 
 def gen_uuid():
     return shortuuid.uuid()

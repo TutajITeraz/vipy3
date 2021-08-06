@@ -20,7 +20,6 @@ Medium priority:
 * Documentation and private methods
 
 Low priority:
-* Save as... dialog
 * more input types
 * reimplement pytorch nodes
 * dialog box on error
