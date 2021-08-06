@@ -224,7 +224,8 @@ class Node:
     def dpg_delete_callback(self,sender,app_data,user_data):
         dpg_node_attr_id = dpg.get_item_parent(sender)
         dpg_node_id = dpg.get_item_parent(dpg_node_attr_id)
-
+        node_conf = dpg.get_item_configuration(dpg_node_id)
+        print(str(node_conf))
 
         #TODO delete input links
 
