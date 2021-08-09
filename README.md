@@ -2,12 +2,17 @@
 Visual Python programming tool that supports pytorch, based on node editor provided by dear pygui
 
 TODO
-----
-WIP:
-  
+====
+Work In Progress:
+-----------------
+* reimplement pytorch nodes
+* more input types
+
 High (engine) priority:
+-----------------------
 
 Medium priority:
+----------------
 * Closing meta_node and main meta_nodes
 * Removing nodes should del objects
 * Executing meta-node without dpg gui
@@ -20,8 +25,7 @@ Medium priority:
 * Documentation and private methods
 
 Low priority:
-* more input types
-* reimplement pytorch nodes
+-------------
 * dialog box on error
 * copy-paste nodes
 * MetaNode from selection
@@ -32,6 +36,7 @@ Low priority:
 * Attrs colors based on type
 
 Blocked:
+--------
 * Create right click menu in node editor
 * re-wiring nodes
 

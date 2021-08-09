@@ -17,7 +17,7 @@ class Node:
         self.outputs = []
         self.actions = {'exe_print':'Exe', 'dpg_get_code_callback': 'Gen code'}
         self.visualizers = {}
-        self.default_executor = ''
+        self.default_executor = 'perform_action'
         
         self.exe_cache = {}
 
