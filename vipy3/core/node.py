@@ -378,5 +378,7 @@ class Node:
         refs = gc.get_referrers(self)
         for r in refs:
             print('ref: ' + str(r))
+
+
     def get_class_name(self):
         return type(self).__name__
