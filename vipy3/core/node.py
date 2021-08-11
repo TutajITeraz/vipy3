@@ -5,19 +5,39 @@ from . import *
 import os
 import weakref
 import gc
+from importlib import import_module
 
 class Node:
-    def __init__(self, parent_meta_node=None, serialized_state=None):
+    def __init__(self, parent_meta_node=None, serialized_state=None, executor_module_name='',package_name='vipy3.core'):
         if parent_meta_node:
             self.parent_meta_node = weakref.proxy(parent_meta_node)
         self.uuid = gen_uuid()
         self.name = self.get_class_name()
 
+        #Loading function from external module:
+        if not hasattr(self, 'executor_module_name'):
+            self.executor_module_name = executor_module_name
+
+        if not hasattr(self, 'default_executor'):
+            self.default_executor = ''
+            if hasattr(self, 'executor_module_name'):
+                self.default_executor = self.executor_module_name
+
+        self.package_name = package_name
+
+        if self.executor_module_name != '':
+            module = import_module('._'+self.executor_module_name,package=(self.package_name))
+            module_func = module.__getattribute__(self.executor_module_name)
+            setattr(self, self.executor_module_name, module_func.__get__(self))
+
+
+
+
         self.inputs = []
         self.outputs = []
         self.actions = {'exe_print':'Exe', 'dpg_get_code_callback': 'Gen code'}
         self.visualizers = {}
-        self.default_executor = 'perform_action'
+        
         
         self.exe_cache = {}
 
@@ -35,6 +55,10 @@ class Node:
         print('class: '+str(self.get_class_name())+' should_render_node:'+str(self.should_render_node))
         if hasattr(self,'parent_meta_node') and self.parent_meta_node and self.should_render_node:
             self.dpg_render_node()
+
+    def unbind_methods(self):
+        if self.executor_module_name != '':
+            del getattr(self,self.executor_module_name)
     
     def __del__(self):
         print('Destructor of '+self.get_name())

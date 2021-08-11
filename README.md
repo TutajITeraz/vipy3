@@ -7,6 +7,7 @@ Work In Progress:
 -----------------
 * reimplement pytorch nodes
 * more input types
+* modify all nodes to new module loading procedure
 
 High (engine) priority:
 -----------------------

@@ -213,7 +213,7 @@ class InConnFile(InConn):
         self.dpg_val_change_callback(sender,app_data,user_data)
         self.value = app_data['file_path_name']
 
-        dpg.set_value(self.dpg_path_text_id, self.value)
+        dpg.set_value(self.dpg_input_id, self.value)
 
     def dpg_file_selector_btn_press(self, sender, app_data, user_data):
         self.dpg_file_dialog_id = dpg.add_file_dialog(label=self.get_label(), callback=lambda s, a, u : self.dpg_file_selected_callback(s, a, u))
@@ -223,6 +223,6 @@ class InConnFile(InConn):
         parent_node_id = self.parent_node.get_dpg_node_id()
         self.dpg_attribute_id = dpg.add_node_attribute(parent=parent_node_id, user_data=weakref.proxy(self))
 
-        self.dpg_input_id = dpg.add_button(label=self.get_label(),parent=self.dpg_attribute_id, callback=lambda a,b,c: self.dpg_file_selector_btn_press(a,b,c))
-        self.dpg_path_text_id = dpg.add_text(self.get_value(False),parent=self.dpg_attribute_id)
+        self.dpg_button_id = dpg.add_button(label=self.get_label(),parent=self.dpg_attribute_id, callback=lambda a,b,c: self.dpg_file_selector_btn_press(a,b,c))
+        self.dpg_input_id = dpg.add_text(self.get_value(False),parent=self.dpg_attribute_id)
         self.dpg_text_id = dpg.add_text(self.get_label(), parent=self.dpg_attribute_id,show=False)
