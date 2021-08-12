@@ -1,6 +1,7 @@
 import dearpygui.dearpygui as dpg
 from . import *
-from vipy3.simple_nodes.meta_in_out import *
+from vipy3.simple_nodes.meta_in import *
+from vipy3.simple_nodes.meta_out import *
 import gc
 import inspect
 
@@ -22,7 +23,7 @@ class MetaNode(Node):
             self.should_render_node = True
 
         super().__init__(parent_meta_node, serialized_state)
-        self.default_executor='outside_call'
+        self.default_executor_name='outside_call'
 
 
     def initialize_values(self):    #TODO: Separate initialize_values from render

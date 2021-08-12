@@ -7,43 +7,23 @@ import weakref
 import gc
 from importlib import import_module
 
+
 class Node:
-    def __init__(self, parent_meta_node=None, serialized_state=None, executor_module_name='',package_name='vipy3.core'):
+    def __init__(self, parent_meta_node=None, serialized_state=None):
         if parent_meta_node:
             self.parent_meta_node = weakref.proxy(parent_meta_node)
         self.uuid = gen_uuid()
         self.name = self.get_class_name()
-
-        #Loading function from external module:
-        if not hasattr(self, 'executor_module_name'):
-            self.executor_module_name = executor_module_name
-
-        if not hasattr(self, 'default_executor'):
-            self.default_executor = ''
-            if hasattr(self, 'executor_module_name'):
-                self.default_executor = self.executor_module_name
-
-        self.package_name = package_name
-
-        if self.executor_module_name != '':
-            module = import_module('._'+self.executor_module_name,package=(self.package_name))
-            module_func = module.__getattribute__(self.executor_module_name)
-            setattr(self, self.executor_module_name, module_func.__get__(self))
-
-
-
+        self.default_executor_name = 'default_executor'
 
         self.inputs = []
         self.outputs = []
         self.actions = {'exe_print':'Exe', 'dpg_get_code_callback': 'Gen code'}
         self.visualizers = {}
         
-        
         self.exe_cache = {}
-
         self.stage = 0
         self.position = [10,10]
-
         self.fresh = False
         self.should_render_node = True
 
@@ -56,9 +36,57 @@ class Node:
         if hasattr(self,'parent_meta_node') and self.parent_meta_node and self.should_render_node:
             self.dpg_render_node()
 
+
+        print('DEBUG _get_executor_function_text DEBUG')
+        print(str(self._get_executor_function_text()))
+        print('END DEBUG _get_executor_function_text DEBUG END')
+
+    def _get_self_filepath(self):
+        return os.path.abspath(sys.modules[self.__class__.__module__].__file__)
+
+    def _get_executor_function_text(self):
+        code = ''
+        imports_code = ''
+        functions_code = ''
+
+        imports_started = False
+
+        code_started = False
+
+        f = open(self._get_self_filepath(), "r")
+        for line in f:
+
+            if '#EXECUTOR IMPORTS BEGIN#' in line:
+                imports_started = True
+                continue
+
+            if '#EXECUTOR CODE BEGIN#' in line:
+                code_started = True
+                continue
+
+            if '#EXECUTOR IMPORTS END#' in line:
+                imports_started = False
+                continue
+
+            if '#EXECUTOR CODE END#' in line:
+                code_started = False
+                break
+
+            if code_started:
+                code += line[4:]
+
+            if imports_started:
+                imports_code += line
+
+        f.close()
+
+        return {'imports_code': imports_code, 'functions_code': functions_code, 'code': code}
+
+
     def unbind_methods(self):
-        if self.executor_module_name != '':
-            del getattr(self,self.executor_module_name)
+        pass
+        #if hasattr(self,'executor_module_name') and self.executor_module_name != '':
+        #    del getattr(self,self.executor_module_name)
     
     def __del__(self):
         print('Destructor of '+self.get_name())
@@ -66,7 +94,7 @@ class Node:
     #TODO set fresh to false when changing any input value
 
     def dpg_get_code_callback(self):
-        code = self.get_code(self.default_executor)
+        code = self.get_code(self.default_executor_name)
         full_code = code['imports_code'] + '\n' + code['functions_code']+ '\n' + code['code']
         #print(code)
         cw = CodeWindow(full_code)
@@ -87,10 +115,12 @@ class Node:
             imports_code += input_code['imports_code']
             functions_code += input_code['functions_code']
 
+        #
         script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
         rel_path = "../simple_nodes/"
         abs_file_path = os.path.join(script_dir, rel_path)
 
+        '''
         if value_executor != 'bypass':
             f = open(abs_file_path+"/_"+value_executor+".py", "r")
             #code_file = f.read()
@@ -120,6 +150,40 @@ class Node:
         else:
             for param in params:
                 code += result_prefix+self.get_name()+'_'+param
+        '''
+
+
+
+        executor_code = self._get_executor_function_text()
+        imports_code = executor_code['imports_code']
+
+        if value_executor != 'bypass':
+            for line in executor_code['code'].splitlines():
+                line = line+'\n'
+                if not 'def' in line:
+                    print('line ======> '+line)
+                    if line[0]==' ':
+                        #line = line.lstrip()
+                        line = line[4:]
+
+                    for param in params:
+                        line = line.replace(param, self.get_name()+'_'+param)
+                    if not 'return' in line:
+                        code+=line 
+                    elif result_prefix != '':
+                        print('line ======> (1) '+line)
+                        result_line = line.replace("return ", result_prefix)
+                        print('line ======> (1 result) '+result_line)
+                        code+=result_line
+                    else:
+                        print('line ======> (2) '+line)
+                        result_line = line.replace("return ", "print( ") + " )"
+                        print('line ======> (2 result) '+result_line)
+                        code+=result_line
+
+        else:
+            for param in params:
+                code += result_prefix+self.get_name()+'_'+param
 
         #Add indentation:
         indent_code = ''
@@ -133,12 +197,12 @@ class Node:
         return input.get_code(result_prefix,indent=indent)
 
     def exe_print(self):
-        print('default_executor: ', self.default_executor)
-        print(str(self.get_exe_result(self.default_executor)))
+        print('default_executor_name: ', self.default_executor_name)
+        print(str(self.get_exe_result(self.default_executor_name)))
 
     def get_exe_result(self,exe_func_name=''):
         if exe_func_name == '':
-            exe_func_name=self.default_executor
+            exe_func_name=self.default_executor_name
 
         if self.is_fresh() and exe_func_name in self.exe_cache:
             print(self.get_name()+' node is fresh and returning cached value:'+str(self.exe_cache[exe_func_name]))
