@@ -111,6 +111,9 @@ class Node:
 
         for param in params:
             input_code = self._get_input_code(param, self.get_name()+'_'+str(param) + ' = ')
+            if(len(input_code)<2):
+                continue
+
             code += input_code['code'] + '\n'
             imports_code += input_code['imports_code']
             functions_code += input_code['functions_code']

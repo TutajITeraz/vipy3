@@ -12,7 +12,21 @@ dpg.set_viewport_height(600)
 dpg.set_viewport_pos([1,1])
 
 WORKSPACE = Workspace()
-nodes_available = {'math': {'add': ViAdd, 'advanced': {'sqrt': None}}, 'flow': {'for': ViFor, 'if': ViIf}, 'meta':{'meta_node': MetaNode, 'input': ViMetaIn, 'output': ViMetaOut}, 'visualize': {'show text': ViShowText}, 'pytorch': {'loading_data': {'load_mnist': ViLoadDatasetMNIST}} }
+nodes_available = {'math':
+                       {'add': ViAdd},
+                   'flow':
+                       {'for': ViFor, 'if': ViIf},
+                   'meta':
+                       {'meta_node': MetaNode, 'input': ViMetaIn, 'output': ViMetaOut},
+                   'visualize':
+                       {'show text': ViShowText},
+                   'pytorch':
+                       {'loading_data':
+                            {'load_mnist': ViLoadDatasetMNIST, 'load_cifar10': ViLoadDatasetCIFAR10},
+                        'processing_data':
+                            {'random_sampler': ViRandomSampler}
+                        }
+                   }
 WORKSPACE.add_nodes_available(nodes_available)
 
 DPG_PRIMARY_WINDOW_ID = dpg.add_window(label="vipy3", width=800, height=800, pos=(100, 100) )

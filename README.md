@@ -7,6 +7,7 @@ Work In Progress:
 -----------------
 * reimplement pytorch nodes
 * more input types
+* multi output code generator
 
 High (engine) priority:
 -----------------------
@@ -23,6 +24,7 @@ Medium priority:
 * Specify function types and return types
 * add nodes to workspace by themselves
 * Documentation and private methods
+* InConnX serialize/deserialize could use parents methods
 
 Low priority:
 -------------
