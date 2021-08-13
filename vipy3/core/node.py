@@ -123,40 +123,6 @@ class Node:
         rel_path = "../simple_nodes/"
         abs_file_path = os.path.join(script_dir, rel_path)
 
-        '''
-        if value_executor != 'bypass':
-            f = open(abs_file_path+"/_"+value_executor+".py", "r")
-            #code_file = f.read()
-            for line in f:
-                if not 'def' in line:
-                    print('line ======> '+line)
-                    if line[0]==' ':
-                        #line = line.lstrip()
-                        line = line[4:]
-
-                    for param in params:
-                        line = line.replace(param, self.get_name()+'_'+param)
-                    if not 'return' in line:
-                        code+=line 
-                    elif result_prefix != '':
-                        print('line ======> (1) '+line)
-                        result_line = line.replace("return ", result_prefix)
-                        print('line ======> (1 result) '+result_line)
-                        code+=result_line
-                    else:
-                        print('line ======> (2) '+line)
-                        result_line = line.replace("return ", "print( ") + " )"
-                        print('line ======> (2 result) '+result_line)
-                        code+=result_line
-
-            f.close()
-        else:
-            for param in params:
-                code += result_prefix+self.get_name()+'_'+param
-        '''
-
-
-
         executor_code = self._get_executor_function_text()
         imports_code = executor_code['imports_code']
 

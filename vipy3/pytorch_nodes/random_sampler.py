@@ -19,7 +19,6 @@ class ViRandomSampler(Node):
                         ]
         self.outputs = [ OutConn(self,'valid_sampler', 'get_train_sampler', type='tensor') ]
 
-    #EXECUTOR FUNCTIONS BEGIN#
     def gen_subset_random_sampler(self, train_data, valid_size):
         num_train = len(train_data)
         indices = list(range(num_train))
@@ -29,22 +28,37 @@ class ViRandomSampler(Node):
         train_idx, valid_idx = indices[split:], indices[:split]
 
         # define samplers for obtaining training and validation batches
-        gen_subset_random_sampler.train_sampler = SubsetRandomSampler(train_idx)
-        gen_subset_random_sampler.valid_sampler = SubsetRandomSampler(valid_idx)
+        self.train_sampler = SubsetRandomSampler(train_idx)
+        self.valid_sampler = SubsetRandomSampler(valid_idx)
 
-        return (self.gen_subset_random_sampler.train_sampler, self.gen_subset_random_sampler.valid_sampler)
-    #static:
-    gen_subset_random_sampler.train_sampler = None
-    gen_subset_random_sampler.valid_sampler = None
-    #EXECUTOR FUNCTIONS END#
+        #here we will save that data to self. Self will be replaced with NodeName_
+
+        return (self.train_sampler, self.valid_sampler)
 
     #EXECUTOR CODE BEGIN#
     def get_train_sampler(self, train_data, valid_size):
-        train, valid = self.gen_subset_random_sampler()
-        return train
+
+        train, valid = self.get_exe_result('gen_subset_random_sampler')
+        return self.train_sampler
 
     def get_valid_sampler(self, train_data, valid_size):
-        train, valid = self.gen_subset_random_sampler()
-        return valid
+        train, valid = self.get_exe_result('gen_subset_random_sampler')
+        return self.valid_sampler
+
     #EXECUTOR CODE END#
 
+
+    '''
+    1. Replace self.get_exe_result('xxxx') with code get by:
+        self.get_code(self, 'xxxx', result_prefix='', indent='')
+        
+    2. Add code_uuid to the function above
+    
+    3. Interprete if code_uuid is new - return function code else - return variable name
+    
+    4. Change variable names to output name instead of input names
+        4.1 intermediate step - output in = out
+        
+    1.1 Replace "self." with node.get_name()
+    
+    '''
