@@ -94,12 +94,15 @@ class Node:
     #TODO set fresh to false when changing any input value
 
     def dpg_get_code_callback(self):
-        code = self.get_code(self.default_executor_name)
+        code_uuid = gen_uuid()
+        code = self.get_code(self.default_executor_name, code_uuid=code_uuid)
+
         full_code = code['imports_code'] + '\n' + code['functions_code']+ '\n' + code['code']
-        #print(code)
         cw = CodeWindow(full_code)
     
-    def get_code(self, value_executor, result_prefix='', indent=''):
+    def get_code(self, value_executor, result_prefix='', indent='', code_uuid=''):
+        print(self.get_name()+' uuid '+code_uuid)
+
         code = ''
         imports_code = ''
         functions_code = ''
@@ -110,7 +113,7 @@ class Node:
         params = inspect.signature(func_to_call).parameters
 
         for param in params:
-            input_code = self._get_input_code(param, self.get_name()+'_'+str(param) + ' = ')
+            input_code = self._get_input_code(param, self.get_name()+'_'+str(param) + ' = ', code_uuid=code_uuid)
             if(len(input_code)<2):
                 continue
 
@@ -130,24 +133,42 @@ class Node:
             for line in executor_code['code'].splitlines():
                 line = line+'\n'
                 if not 'def' in line:
-                    print('line ======> '+line)
+                    #print('line ======> '+line)
                     if line[0]==' ':
                         #line = line.lstrip()
                         line = line[4:]
 
+                    if 'self.get_exe_result(' in line:
+                        result_line = line.split("self.get_exe_result(")[1]
+                        result_line = result_line.split(")")[0]
+
+                        result_line = result_line.replace("'", "")
+                        result_line = result_line.replace('"', '')
+
+                        #TODO because output caches ;) But do we really have to had an output to perform this?
+                        #TODO Maybe hidden output will do?
+                        output = self.get_output_by_name(result_line)
+                        result_code = output.get_code(result_prefix='', indent='', code_uuid=code_uuid)
+
+                        code += result_code['code']
+                        continue
+
+                    line = line.replace('self.',self.get_name()+'_')
+
                     for param in params:
                         line = line.replace(param, self.get_name()+'_'+param)
+
                     if not 'return' in line:
                         code+=line 
                     elif result_prefix != '':
-                        print('line ======> (1) '+line)
+                        #print('line ======> (1) '+line)
                         result_line = line.replace("return ", result_prefix)
-                        print('line ======> (1 result) '+result_line)
+                        #print('line ======> (1 result) '+result_line)
                         code+=result_line
                     else:
-                        print('line ======> (2) '+line)
+                        #print('line ======> (2) '+line)
                         result_line = line.replace("return ", "print( ") + " )"
-                        print('line ======> (2 result) '+result_line)
+                        #print('line ======> (2 result) '+result_line)
                         code+=result_line
 
         else:
@@ -161,9 +182,14 @@ class Node:
 
         return {'imports_code': imports_code, 'functions_code': functions_code, 'code': indent_code}
 
-    def _get_input_code(self, input_name, result_prefix='', indent=''):
+    def _get_input_code(self, input_name, result_prefix='', indent='', code_uuid=''):
+        print('getting input: '+input_name)
         input = self.get_input_by_name(input_name)
-        return input.get_code(result_prefix,indent=indent)
+        if input is None:
+            LOG.log('error', 'cannot find input: '+input_name)
+            return {'imports_code': '', 'functions_code': '', 'code': ''}
+
+        return input.get_code(result_prefix, indent=indent, code_uuid=code_uuid)
 
     def exe_print(self):
         print('default_executor_name: ', self.default_executor_name)

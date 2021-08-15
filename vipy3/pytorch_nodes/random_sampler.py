@@ -12,14 +12,20 @@ import torch.nn.functional as F
 class ViRandomSampler(Node):
     def __init__(self, parent_meta_node=None, serialized_state=None):
         super().__init__(parent_meta_node, serialized_state)
+        self.default_executor_name = 'get_samplers'
 
     def initialize_values(self):
         self.inputs = [ InConnPercent(self,'valid_size',default_value=0.2),
                         InConn(self,'train_data',None)
                         ]
-        self.outputs = [ OutConn(self,'valid_sampler', 'get_train_sampler', type='tensor') ]
+        self.outputs = [ OutConn(self,'valid_sampler', 'get_train_sampler', type='tensor'),
+                         OutConn(self,'train_sampler', 'get_train_sampler', type='tensor'),
+                         OutConn(self,'get_samplers', 'get_samplers', type='tensor', hidden=True)]
+        #functions used by other functions have to have the same name and executor
 
-    def gen_subset_random_sampler(self, train_data, valid_size):
+
+    #EXECUTOR CODE BEGIN#
+    def get_samplers(self, train_data, valid_size):
         num_train = len(train_data)
         indices = list(range(num_train))
 
@@ -35,14 +41,13 @@ class ViRandomSampler(Node):
 
         return (self.train_sampler, self.valid_sampler)
 
-    #EXECUTOR CODE BEGIN#
     def get_train_sampler(self, train_data, valid_size):
 
-        train, valid = self.get_exe_result('gen_subset_random_sampler')
+        train, valid = self.get_exe_result('get_samplers')
         return self.train_sampler
 
     def get_valid_sampler(self, train_data, valid_size):
-        train, valid = self.get_exe_result('gen_subset_random_sampler')
+        train, valid = self.get_exe_result('get_samplers')
         return self.valid_sampler
 
     #EXECUTOR CODE END#

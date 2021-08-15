@@ -20,13 +20,13 @@ class ViLoadDatasetMNIST(Node):
         self.inputs = [ InConnFile(self,'root','~/pydata',label='root directory'),
                         InConnBool(self,'train',True),
                         InConnBool(self,'download',True),
-                        InConn(self,'transforms',None)
+                        InConn(self,'transformations',None)
                         ]
         self.outputs = [ OutConn(self,'data', 'default_executor', type='tensor') ]
 
     #EXECUTOR CODE BEGIN#
-    def default_executor(self, transforms, root, train, download):
+    def default_executor(self, transformations, root, train, download):
         return datasets.MNIST(root=expanduser(root), train=train, download=download,
-                              transform=transforms.Compose(transforms))
+                              transform=transforms.Compose(transformations))
     #EXECUTOR CODE END#
 

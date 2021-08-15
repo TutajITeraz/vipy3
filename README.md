@@ -7,7 +7,7 @@ Work In Progress:
 -----------------
 * reimplement pytorch nodes
 * more input types
-* multi output code generator
+* multi output code generator (random sampler code gen)
 
 High (engine) priority:
 -----------------------

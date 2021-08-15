@@ -90,11 +90,11 @@ class InConn():
 
         return self.value
 
-    def get_code(self, result_prefix='', indent=''):
+    def get_code(self, result_prefix='', indent='', code_uuid=''):
         if self.is_connected():
             connected_out = self.get_connected_node_out()
             print('connected_out = '+str(connected_out))
-            return connected_out.get_code(result_prefix, indent=indent)
+            return connected_out.get_code(result_prefix, indent=indent, code_uuid=code_uuid)
         elif hasattr(self,'dpg_input_id') and self.dpg_input_id:
             return {'imports_code': '', 'functions_code': '', 'code': indent+result_prefix + str(dpg.get_value(self.dpg_input_id))}
         return ''
@@ -240,5 +240,4 @@ class InConnPercent(InConn):
         parent_node_id = self.parent_node.get_dpg_node_id()
         self.dpg_attribute_id = dpg.add_node_attribute(parent=parent_node_id, user_data=weakref.proxy(self))
         self.dpg_input_id = dpg.add_slider_float(label=self.get_label(), default_value=self.get_value(False), width=75, parent=self.dpg_attribute_id, max_value=1.0, min_value=0.0, callback=lambda a,b,c: self.dpg_val_change_callback(a,b,c) )
-        self.dpg_input_id = dpg.add_input_int(label=self.get_label(), default_value=self.get_value(False), width=75, parent=self.dpg_attribute_id, max_value=self.max, min_value=self.min, callback=lambda a,b,c: self.dpg_val_change_callback(a,b,c) )
         self.dpg_text_id = dpg.add_text(self.get_label(), parent=self.dpg_attribute_id,show=False)
