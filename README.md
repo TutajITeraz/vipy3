@@ -14,6 +14,7 @@ High (engine) priority:
 
 Medium priority:
 ----------------
+* Last saved path and Main meta node in window titlebar
 * Closing meta_node and main meta_nodes
 * Removing nodes should del objects
 * Executing meta-node without dpg gui
