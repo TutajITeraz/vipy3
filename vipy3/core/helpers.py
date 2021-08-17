@@ -9,13 +9,90 @@ from os.path import expanduser
 from dearpygui.logger import mvLogger
 
 import dearpygui.dearpygui as dpg
+import sys
+from io import StringIO
+import contextlib
+
+@contextlib.contextmanager
+def stdoutIO(stdout=None):
+    old = sys.stdout
+    if stdout is None:
+        stdout = StringIO()
+    sys.stdout = stdout
+    yield stdout
+    sys.stdout = old
+
 
 DEFAULT_FOLDER='~/pydata/'
-DEFAULT_WORKSPACE_SAVE_PATH = DEFAULT_FOLDER + 'default.viworkspace'
+DEFAULT_WORKSPACE_SAVE_PATH = DEFAULT_FOLDER + 'default.viw'
 
 def gen_uuid():
     return shortuuid.uuid()
     #return uuid.uuid1()
+
+def namestr(obj, namespace):
+    return [name for name in namespace if namespace[name] is obj]
+
+class CodeWindow():
+    def __init__(self,code=''):
+        self.code = code
+
+        self.dpg_show_window()
+    
+
+    def dpg_show_window(self):
+        self.dpg_window_id = dpg.add_window(label="Code",width=400, height=400)
+        self.dpg_code_text_id = dpg.add_input_text(label="", width=-1, height=-25, multiline=True, default_value=self.code, tab_input=True,parent=self.dpg_window_id)
+        
+        self.gpg_window_group1 = dpg.add_group(horizontal=True,parent=self.dpg_window_id)
+        self.dpg_run_btn_id = dpg.add_button(arrow=True, direction=dpg.mvDir_Right, callback=self.execute_callback,parent=self.gpg_window_group1)
+        self.dpg_result_id = dpg.add_input_text(label="", width=-1, multiline=False, default_value='', tab_input=True,parent=self.gpg_window_group1)
+
+
+    def execute_callback(self):
+        self.execute()
+
+    def execute(self):
+        with stdoutIO() as s:
+            try:
+                exec(self.code)
+            except:
+                LOG.log('error','code error - exec exception')
+        result = s.getvalue()
+
+        dpg.set_value(self.dpg_result_id, result)
+
+def dpg_create_waiting_node_theme():
+    with dpg.theme(default_theme=False) as theme_id:
+        dpg.add_theme_color(dpg.mvNodeCol_TitleBar, (150, 150, 0, 255), category=dpg.mvThemeCat_Nodes)
+        dpg.add_theme_color(dpg.mvNodeCol_TitleBarHovered, (150, 150, 0, 255), category=dpg.mvThemeCat_Nodes)
+        dpg.add_theme_color(dpg.mvNodeCol_TitleBarSelected, (150, 150, 0, 255), category=dpg.mvThemeCat_Nodes)
+        #dpg.add_theme_color(dpg.mvNodeCol_Pin, (53, 150, 250, 180), category=dpg.mvThemeCat_Nodes)
+
+    return theme_id
+
+def dpg_create_calculating_node_theme():
+    with dpg.theme(default_theme=False) as theme_id:
+        dpg.add_theme_color(dpg.mvNodeCol_TitleBar, (150, 66, 0, 255), category=dpg.mvThemeCat_Nodes)
+        dpg.add_theme_color(dpg.mvNodeCol_TitleBarHovered, (150, 66, 0, 255), category=dpg.mvThemeCat_Nodes)
+        dpg.add_theme_color(dpg.mvNodeCol_TitleBarSelected, (150, 66, 0, 255), category=dpg.mvThemeCat_Nodes)
+
+
+    return theme_id
+
+def dpg_create_done_node_theme():
+    with dpg.theme(default_theme=False) as theme_id:
+        dpg.add_theme_color(dpg.mvNodeCol_TitleBar, (66, 66, 150, 255), category=dpg.mvThemeCat_Nodes)
+        dpg.add_theme_color(dpg.mvNodeCol_TitleBarHovered, (66, 66, 150, 255), category=dpg.mvThemeCat_Nodes)
+        dpg.add_theme_color(dpg.mvNodeCol_TitleBarSelected, (66, 66, 150, 255), category=dpg.mvThemeCat_Nodes)
+
+
+    return theme_id
+
+WAITING_NODE_THEME = dpg_create_waiting_node_theme()
+CALCULATING_NODE_THEME = dpg_create_calculating_node_theme()
+DONE_NODE_THEME = dpg_create_done_node_theme()
+
 
 class Logger():#TODO logger with status bar and popup windows on error
     def __init__(self):
@@ -76,6 +153,8 @@ def load_data(filepath=DEFAULT_WORKSPACE_SAVE_PATH):
     data = pickle.load(infile)
     infile.close()
     return data
+
+
 
 LOG = Logger()
 LOG.log('test1')

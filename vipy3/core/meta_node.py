@@ -1,19 +1,38 @@
 import dearpygui.dearpygui as dpg
 from . import *
-
+from vipy3.simple_nodes.meta_in_out import *
+import gc
+import inspect
 
 class MetaNode(Node):
     def __init__(self,  parent_meta_node=None, serialized_state='', parent_workspace=None):
         self.parent_workspace = parent_workspace
         self.nodes = {}
+        self.dpg_is_rendered = False
+        self.meta_inputs_counter = 0
+        self.meta_outputs_counter = 0
 
+        #Main meta node:
         self.should_render_editor = True
         self.should_render_node = False
-        
+
+        #Meta inside (as a node):
+        if parent_meta_node is not None:
+            self.should_render_editor = False
+            self.should_render_node = True
+
         super().__init__(parent_meta_node, serialized_state)
+        self.default_executor='outside_call'
 
 
     def initialize_values(self):    #TODO: Separate initialize_values from render
+        if self.should_render_editor:
+            self.dpg_render_editor()
+
+        self.actions['open_meta_editor'] = 'Open Editor'
+
+    def open_meta_editor(self):
+        self.should_render_editor = True
         self.dpg_render_editor()
 
     def render_node(self):
@@ -25,10 +44,153 @@ class MetaNode(Node):
         LOG.log('add_node_callback user_data '+ str(user_data))
 
         self.add_node_to_editor(user_data['node_class'])
+
+    #This function is always called from outside
+    def outside_call(self):
+        #Get ViMetaOut
+        output = self.get_output_by_name('out1')
+        result = output.get_value()
+
+        print("Meta node outside call:"+str(result))
+
+        return result
+
+    def get_meta_out_nodes(self):
+        results = []
+        for node_uuid in self.nodes:
+            if self.nodes[node_uuid].__class__ == ViMetaOut:
+                results.append(self.nodes[node_uuid])
+        return results
+
+    def delete_node(self,node_uuid):
+        print('deleting children node:'+node_uuid)
+        #TODO use weakref.ref() 
+        if node_uuid in self.nodes:
+            node = self.nodes[node_uuid]
+
+            del self.nodes[node_uuid]
+
+            gc.collect()
+            print('it has '+str(sys.getrefcount(node))+' references')
+            refs = gc.get_referrers(node)
+            for r in refs:
+                print('ref: '+str(r))
+
+            del node
+
+        else:
+            LOG.log('warning','Trying to delete non existing node')
+
+    def inside_call(self):
+        #Get Out NODE
+
+        out_nodes = self.get_meta_out_nodes()
+        for n in out_nodes:
+            result = n.get_exe_result()
+            print("Meta node inside call:" + str(result))
+            return result
+
+        return None
     
-    def add_node_to_editor(self, node_class):
+
+    def get_code(self, value_executor, result_prefix='', indent=''):
+        code = ''
+        imports_code = ''
+        functions_code = 'def '+self.get_name()+'('
+        i=0
+        for input in self.get_all_inputs():
+            if i!=0:
+                functions_code += ','
+            i+=1
+            functions_code += input.get_name()
+
+        functions_code+='):\n'
+
+        print('value_executor: ', str(value_executor))
+
+        func_to_call = getattr(self,value_executor)
+        params = inspect.signature(func_to_call).parameters
+
+        for input in self.get_all_inputs():
+            param = input.get_name()
+            input_code = self._get_input_code(param, self.get_name()+'_'+str(param) + ' = ')
+            imports_code += input_code['imports_code']
+            functions_code += input_code['functions_code'] + '\n'
+            code += input_code['code'] + '\n'
+
+        #Function call:
+        if result_prefix != '':
+            code += result_prefix + self.get_name()+'('
+        else:
+            code += 'print( ' + self.get_name()+'('
+        i=0
+        for input in self.get_all_inputs():
+            if i!=0:
+                code += ','
+            i+=1
+            code += self.get_name()+'_'+input.get_name()
+
+        if result_prefix == '':
+            code += ')'
+        code += ')\n'
+
+
+
+        #Actual function body:
+
+        out_nodes = self.get_meta_out_nodes()
+        for n in out_nodes:
+            all_code = n.get_code('bypass', result_prefix='return ', indent='    ')
+            functions_code += all_code['code']
+            imports_code += all_code['imports_code']
+            functions_code += all_code['functions_code']
+
+
+        #Add indentation:
+        indent_code = ''
+        for line in code.splitlines():
+            indent_code += indent+line+'\n'
+
+        return {'imports_code': imports_code, 'functions_code': functions_code, 'code': indent_code}
+
+
+    def add_node_to_editor(self, node_class, state=None):
         LOG.log('add_node_to_editor: '+str(node_class))
-        new_node = node_class(parent_meta_node=self)
+
+        new_node = None
+        if node_class == MetaNode:
+            new_node = node_class(parent_meta_node=self, parent_workspace=self.parent_workspace, serialized_state=state)
+        else:
+            new_node = node_class(parent_meta_node=self, serialized_state=state)
+        
+            if node_class == ViMetaIn:
+                new_in_name=new_node.get_name()
+                if not state:
+                    self.meta_inputs_counter += 1
+                    new_in_name='in'+str(self.meta_inputs_counter)
+                    new_node.set_name(new_in_name)
+
+                new_input = InConn(self,new_in_name)
+                self.inputs.append( new_input )
+                if not state:
+                    new_input.dpg_render()
+
+            elif node_class == ViMetaOut:
+                print ('NEW NOODE CLASS IS META OUT')
+                print ('state is: '+str(state))
+                new_out_name=new_node.get_name()
+                if not state:
+                    print ('new name generation')
+                    self.meta_outputs_counter += 1
+                    new_out_name = 'out'+str(self.meta_outputs_counter)
+                    print ('new_out_name='+new_out_name)
+                    new_node.set_name(new_out_name)
+                
+                print ('Creating OutConn: new_out_name='+new_out_name)
+                new_output = OutConn(self,new_out_name, 'inside_call', type='any')
+                self.outputs.append( new_output )
+                if not state:
+                    new_output.dpg_render()
 
         self.nodes[new_node.get_uuid()] = new_node
 
@@ -84,13 +246,18 @@ class MetaNode(Node):
         dpg.delete_item(link_dpg_id)
 
     def dpg_render_editor(self):
-        self.dpg_window_id = dpg.add_window(label=self.get_name(), width=800, height=600, pos=(50, 50))
+        position = [50,50]
+        if hasattr(self,'parent_meta_node') and self.parent_meta_node:
+            position = self.parent_meta_node.dpg_get_window_pos()
+            position[0] += 20
+            position[1] += 20
+        self.dpg_window_id = dpg.add_window(label=self.get_name(), width=800, height=600, pos=position)
 
         self.dpg_menu_bar_id = dpg.add_menu_bar(label='Workspace menu bar', parent=self.dpg_window_id)
-        self.dpg_meta_node_menu_id = dpg.add_menu(label='MetaNode', parent=self.dpg_menu_bar_id)
-        dpg.add_menu_item(label='Load MetaNode', parent=self.dpg_meta_node_menu_id)#TODO load meta_node
-        dpg.add_menu_item(label='Save MetaNode', parent=self.dpg_meta_node_menu_id)#TODO save meta_node
-        dpg.add_menu_item(label='Save MetaNode As...', parent=self.dpg_meta_node_menu_id)#TODO save as meta_node
+        #self.dpg_meta_node_menu_id = dpg.add_menu(label='MetaNode', parent=self.dpg_menu_bar_id)
+        #dpg.add_menu_item(label='Load MetaNode', parent=self.dpg_meta_node_menu_id)#TODO load meta_node
+        #dpg.add_menu_item(label='Save MetaNode', parent=self.dpg_meta_node_menu_id)#TODO save meta_node
+        #dpg.add_menu_item(label='Save MetaNode As...', parent=self.dpg_meta_node_menu_id)#TODO save as meta_node
 
         self.dpg_add_node_menu_id = dpg.add_menu(label='Add Node...', parent=self.dpg_menu_bar_id)
 
@@ -119,7 +286,7 @@ class MetaNode(Node):
                 if nodes[n] is not None:
                     print('nodes[n]'+ str(nodes[n]))
 
-                    menu_item_id = dpg.add_menu_item(label=n, parent=dpg_parent, callback=self.add_node_callback, user_data={'node_class': nodes[n]})
+                    menu_item_id = dpg.add_menu_item(label=n, parent=dpg_parent, callback=(lambda a,b,c: self.add_node_callback(a,b,c)), user_data={'node_class': nodes[n]})
                 else:
                     menu_item_id = dpg.add_menu_item(label=n, parent=dpg_parent)
 
@@ -129,19 +296,35 @@ class MetaNode(Node):
     def saveStatusToFile(self): #TODO save
         pass
 
+    def dpg_get_window_pos(self):
+        return dpg.get_item_pos(self.dpg_window_id)
+
     def serialize(self):
         status = {}
+        status['uuid']=self.get_uuid()
+        status['name']=self.get_name()
+        status['meta_inputs_counter'] = self.meta_inputs_counter
+        status['meta_outputs_counter']= self.meta_outputs_counter
+
+
         status['dpg_is_rendered'] = self.dpg_is_rendered
+        status['class_name']=self.get_class_name()
+        status['should_render_editor'] = self.should_render_editor
+        status['should_render_node'] = self.should_render_node
+        status['actions'] = self.actions
+
+        if hasattr(self,'dpg_node_id'):
+            print("NODE POSITION SAVED:"+str(self.get_position()))
+            status['position']=self.get_position()
+
         if self.dpg_is_rendered:
             status['dpg_window_width'] = dpg.get_item_width(self.dpg_window_id)
             status['dpg_window_height'] = dpg.get_item_height(self.dpg_window_id)
-            status['dpg_window_pos'] = dpg.get_item_pos(self.dpg_window_id)
+            status['dpg_window_pos'] = self.dpg_get_window_pos()
 
         status['nodes']={}
         for n in self.nodes:
             status['nodes'][n] = self.nodes[n].serialize()
-
-        #TODO add all links to status:
 
         links = []
 
@@ -173,7 +356,18 @@ class MetaNode(Node):
         return status
 
     def deserialize(self, status):
+        self.uuid = status['uuid']
+        self.name = status['name']
+        if 'meta_inputs_counter' in status:
+            self.meta_inputs_counter = status['meta_inputs_counter']
+        if 'meta_outputs_counter' in status:
+            self.meta_outputs_counter = status['meta_outputs_counter']
+
         self.dpg_is_rendered = status['dpg_is_rendered']
+        self.should_render_editor = status['should_render_editor']
+        self.should_render_node = status['should_render_node']
+        self.actions = status['actions']
+
         if self.dpg_is_rendered:
             self.dpg_render_editor()
             dpg.set_item_width(self.dpg_window_id,status['dpg_window_width'])
@@ -181,7 +375,10 @@ class MetaNode(Node):
             dpg.set_item_pos(self.dpg_window_id,status['dpg_window_pos'])
 
         for n in status['nodes']:
-            self.nodes[n] = Node(self, status['nodes'][n])
+            #TODO should create specific node class, not generic node
+            class_name = status['nodes'][n]['class_name']
+            node_class = getattr(sys.modules['vipy3'], class_name)
+            self.add_node_to_editor(node_class,status['nodes'][n])
 
         links = status['links']
 
@@ -204,3 +401,8 @@ class MetaNode(Node):
 
             dpg.add_node_link(link_from_dpg_id, link_to_dpg_id, parent=self.dpg_get_node_editor_id(), user_data=link_to_attr)#TODO WHY?
             #dpg.add_node_link(attr_from_dpg_id, attr_to_dpg_id, parent=sender, user_data=attr_to)
+
+        if 'position' in status:
+            self.set_position(status['position'])
+
+        self.fresh = False

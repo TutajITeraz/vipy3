@@ -1,13 +1,38 @@
 # vipy3
-Visual Python programming that supports pytorch, based on node editor provided by dear pygui
+Visual Python programming tool that supports pytorch, based on node editor provided by dear pygui
 
 TODO
 ----
-* Create right click menu in node editor
-* Save as... dialog
-* for
+WIP:
+  
+High (engine) priority:
+
+Medium priority:
+* Closing meta_node and main meta_nodes
+* Removing nodes should del objects
+* Executing meta-node without dpg gui
+* Removing meta node in/outs should remove node attributes too
+* Meta-node input disconnect
+* For last result output and recurency
+* replace lambda a,b,c with proper solution
+* Specify function types and return types
+* add nodes to workspace by themselves
+* Documentation and private methods
+
+Low priority:
 * more input types
-* hiding input on connection
-* deleting nodes
 * reimplement pytorch nodes
 * dialog box on error
+* copy-paste nodes
+* MetaNode from selection
+* Node creator / node code editor
+* Node outputs - align to right
+* Prettier node colors
+* Smaller nodes style
+* Attrs colors based on type
+
+Blocked:
+* Create right click menu in node editor
+* re-wiring nodes
+
+Author: Łukasz Bolda

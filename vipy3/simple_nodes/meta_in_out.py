@@ -5,29 +5,31 @@ import sys
 class ViMetaIn(Node):
     def __init__(self, parent_meta_node=None, serialized_state=None):
         super().__init__(parent_meta_node, serialized_state)
+        self.default_executor = 'bypass'
 
     def initialize_values(self):
-        self.outputs = {'input': OutConn(self,'input', 'default_executor')}
+        self.outputs = [OutConn(self,'input', 'bypass', type='any')]
 
-    def default_executor(self):
-        return 1
+    def bypass(self):
+        value = self.parent_meta_node.get_input_value(self.get_name())
+        return value
 
+    def get_code(self, value_executor, result_prefix='', indent=''):
+        code = indent+result_prefix+self.get_name()
+        return {'imports_code': '', 'functions_code': '', 'code': code}
+
+    def is_fresh(self):
+        real_input = self.parent_meta_node.get_input_by_name(self.get_name())
+        return real_input.is_fresh()
 
 
 class ViMetaOut(Node):
     def __init__(self, parent_meta_node=None, serialized_state=None):
         super().__init__(parent_meta_node, serialized_state)
+        self.default_executor = 'bypass'
 
     def initialize_values(self):
-        self.inputs = {'out': InConnInt(self,'out',1,None,0,100)}
+        self.inputs = [ InConn(self,'out1') ]
 
-    def default_executor(self):
-        a = self.inputs['a'].get_value()
-        b = self.inputs['b'].get_value()
-        result = a+b
-        return result
-
-    def dpg_render_node(self):
-        super().dpg_render_node()
-
-        self.dpg_value_text = dpg.add_text(default_value='(value)',parent=self.dpg_node_id)
+    def bypass(self,out1):
+        return out1

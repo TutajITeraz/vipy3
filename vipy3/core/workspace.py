@@ -37,6 +37,30 @@ class Workspace:
 
     def dpg_save_status_to_file_callback(self, param):
         self.save_status_to_file(self.filepath)
+
+    def dpg_save_callback(self, sender, app_data, user_data):
+        print('sender'+str(sender))
+        print('app_data'+str(app_data))
+        print('user_data'+str(user_data))
+
+        self.save_status_to_file(app_data['file_path_name'])
+
+    def dpg_load_callback(self, sender, app_data, user_data):
+        print('sender'+str(sender))
+        print('app_data'+str(app_data))
+        print('user_data'+str(user_data))
+
+        self.load_status_from_file(app_data['file_path_name'])
+
+    def dpg_save_workspace_as_callback(self, sender, app_data, user_data):
+        self.dpg_file_dialog_id = dpg.add_file_dialog(label='Save Workspace', callback=lambda s, a, u : self.dpg_save_callback(s, a, u))
+        #dpg.add_file_extension(".*", color=(255, 255, 255, 255), parent=self.dpg_file_dialog_id)
+        dpg.add_file_extension(".viw", color=(0, 255, 255, 255), parent=self.dpg_file_dialog_id)
+
+    def dpg_load_workspace_callback(self, sender, app_data, user_data):
+        self.dpg_file_dialog_id = dpg.add_file_dialog(label='Load Workspace', callback=lambda s, a, u : self.dpg_load_callback(s, a, u))
+        #dpg.add_file_extension(".*", color=(255, 255, 255, 255), parent=self.dpg_file_dialog_id)
+        dpg.add_file_extension(".viw", color=(0, 255, 255, 255), parent=self.dpg_file_dialog_id)
         
     def dpg_load_status_from_file_callback(self, param):
         self.load_status_from_file()
@@ -67,7 +91,7 @@ class Workspace:
 
     def serialize(self):
         status = {}
-        status['nodes_available'] = self.nodes_available
+        #status['nodes_available'] = self.nodes_available
         meta_nodes_status={}
         for mn in self.meta_nodes:
             meta_nodes_status[mn] = self.meta_nodes[mn].serialize()
@@ -81,7 +105,7 @@ class Workspace:
     def deserialize(self,status):
         #TODO should delete all existing meta nodes first
         LOG.log(status)
-        self.nodes_available = status['nodes_available']
+        #self.nodes_available = status['nodes_available']
         meta_nodes_status = status['meta_nodes_status']
         for mns in meta_nodes_status:
             self.create_new_meta_node(meta_nodes_status[mns])
