@@ -5,6 +5,8 @@ from . import *
 import os
 import weakref
 import gc
+from importlib import import_module
+
 
 class Node:
     def __init__(self, parent_meta_node=None, serialized_state=None):
@@ -12,18 +14,16 @@ class Node:
             self.parent_meta_node = weakref.proxy(parent_meta_node)
         self.uuid = gen_uuid()
         self.name = self.get_class_name()
+        self.default_executor_name = 'default_executor'
 
         self.inputs = []
         self.outputs = []
         self.actions = {'exe_print':'Exe', 'dpg_get_code_callback': 'Gen code'}
         self.visualizers = {}
-        self.default_executor = ''
         
         self.exe_cache = {}
-
         self.stage = 0
         self.position = [10,10]
-
         self.fresh = False
         self.should_render_node = True
 
@@ -35,6 +35,58 @@ class Node:
         print('class: '+str(self.get_class_name())+' should_render_node:'+str(self.should_render_node))
         if hasattr(self,'parent_meta_node') and self.parent_meta_node and self.should_render_node:
             self.dpg_render_node()
+
+
+        print('DEBUG _get_executor_function_text DEBUG')
+        print(str(self._get_executor_function_text()))
+        print('END DEBUG _get_executor_function_text DEBUG END')
+
+    def _get_self_filepath(self):
+        return os.path.abspath(sys.modules[self.__class__.__module__].__file__)
+
+    def _get_executor_function_text(self):
+        code = ''
+        imports_code = ''
+        functions_code = ''
+
+        imports_started = False
+
+        code_started = False
+
+        f = open(self._get_self_filepath(), "r")
+        for line in f:
+
+            if '#EXECUTOR IMPORTS BEGIN#' in line:
+                imports_started = True
+                continue
+
+            if '#EXECUTOR CODE BEGIN#' in line:
+                code_started = True
+                continue
+
+            if '#EXECUTOR IMPORTS END#' in line:
+                imports_started = False
+                continue
+
+            if '#EXECUTOR CODE END#' in line:
+                code_started = False
+                break
+
+            if code_started:
+                code += line[4:]
+
+            if imports_started:
+                imports_code += line
+
+        f.close()
+
+        return {'imports_code': imports_code, 'functions_code': functions_code, 'code': code}
+
+
+    def unbind_methods(self):
+        pass
+        #if hasattr(self,'executor_module_name') and self.executor_module_name != '':
+        #    del getattr(self,self.executor_module_name)
     
     def __del__(self):
         print('Destructor of '+self.get_name())
@@ -42,12 +94,15 @@ class Node:
     #TODO set fresh to false when changing any input value
 
     def dpg_get_code_callback(self):
-        code = self.get_code(self.default_executor)
+        code_uuid = gen_uuid()
+        code = self.get_code(self.default_executor_name, code_uuid=code_uuid)
+
         full_code = code['imports_code'] + '\n' + code['functions_code']+ '\n' + code['code']
-        #print(code)
         cw = CodeWindow(full_code)
     
-    def get_code(self, value_executor, result_prefix='', indent=''):
+    def get_code(self, value_executor, result_prefix='', indent='', code_uuid=''):
+        print(self.get_name()+' uuid '+code_uuid)
+
         code = ''
         imports_code = ''
         functions_code = ''
@@ -58,41 +113,64 @@ class Node:
         params = inspect.signature(func_to_call).parameters
 
         for param in params:
-            input_code = self._get_input_code(param, self.get_name()+'_'+str(param) + ' = ')
+            input_code = self._get_input_code(param, self.get_name()+'_'+str(param) + ' = ', code_uuid=code_uuid)
+            if(len(input_code)<2):
+                continue
+
             code += input_code['code'] + '\n'
             imports_code += input_code['imports_code']
             functions_code += input_code['functions_code']
 
+        #
         script_dir = os.path.dirname(__file__)  # <-- absolute dir the script is in
         rel_path = "../simple_nodes/"
         abs_file_path = os.path.join(script_dir, rel_path)
 
+        executor_code = self._get_executor_function_text()
+        imports_code = executor_code['imports_code']
+
         if value_executor != 'bypass':
-            f = open(abs_file_path+"/_"+value_executor+".py", "r")
-            #code_file = f.read()
-            for line in f:
+            for line in executor_code['code'].splitlines():
+                line = line+'\n'
                 if not 'def' in line:
-                    print('line ======> '+line)
+                    #print('line ======> '+line)
                     if line[0]==' ':
                         #line = line.lstrip()
                         line = line[4:]
 
+                    if 'self.get_exe_result(' in line:
+                        result_line = line.split("self.get_exe_result(")[1]
+                        result_line = result_line.split(")")[0]
+
+                        result_line = result_line.replace("'", "")
+                        result_line = result_line.replace('"', '')
+
+                        #TODO because output caches ;) But do we really have to had an output to perform this?
+                        #TODO Maybe hidden output will do?
+                        output = self.get_output_by_name(result_line)
+                        result_code = output.get_code(result_prefix='', indent='', code_uuid=code_uuid)
+
+                        code += result_code['code']
+                        continue
+
+                    line = line.replace('self.',self.get_name()+'_')
+
                     for param in params:
                         line = line.replace(param, self.get_name()+'_'+param)
+
                     if not 'return' in line:
                         code+=line 
                     elif result_prefix != '':
-                        print('line ======> (1) '+line)
+                        #print('line ======> (1) '+line)
                         result_line = line.replace("return ", result_prefix)
-                        print('line ======> (1 result) '+result_line)
+                        #print('line ======> (1 result) '+result_line)
                         code+=result_line
                     else:
-                        print('line ======> (2) '+line)
+                        #print('line ======> (2) '+line)
                         result_line = line.replace("return ", "print( ") + " )"
-                        print('line ======> (2 result) '+result_line)
+                        #print('line ======> (2 result) '+result_line)
                         code+=result_line
 
-            f.close()
         else:
             for param in params:
                 code += result_prefix+self.get_name()+'_'+param
@@ -104,17 +182,22 @@ class Node:
 
         return {'imports_code': imports_code, 'functions_code': functions_code, 'code': indent_code}
 
-    def _get_input_code(self, input_name, result_prefix='', indent=''):
+    def _get_input_code(self, input_name, result_prefix='', indent='', code_uuid=''):
+        print('getting input: '+input_name)
         input = self.get_input_by_name(input_name)
-        return input.get_code(result_prefix,indent=indent)
+        if input is None:
+            LOG.log('error', 'cannot find input: '+input_name)
+            return {'imports_code': '', 'functions_code': '', 'code': ''}
+
+        return input.get_code(result_prefix, indent=indent, code_uuid=code_uuid)
 
     def exe_print(self):
-        print('default_executor: ', self.default_executor)
-        print(str(self.get_exe_result(self.default_executor)))
+        print('default_executor_name: ', self.default_executor_name)
+        print(str(self.get_exe_result(self.default_executor_name)))
 
     def get_exe_result(self,exe_func_name=''):
         if exe_func_name == '':
-            exe_func_name=self.default_executor
+            exe_func_name=self.default_executor_name
 
         if self.is_fresh() and exe_func_name in self.exe_cache:
             print(self.get_name()+' node is fresh and returning cached value:'+str(self.exe_cache[exe_func_name]))
@@ -378,5 +461,7 @@ class Node:
         refs = gc.get_referrers(self)
         for r in refs:
             print('ref: ' + str(r))
+
+
     def get_class_name(self):
         return type(self).__name__

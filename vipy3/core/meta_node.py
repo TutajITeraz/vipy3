@@ -1,6 +1,7 @@
 import dearpygui.dearpygui as dpg
 from . import *
-from vipy3.simple_nodes.meta_in_out import *
+from vipy3.simple_nodes.meta_in import *
+from vipy3.simple_nodes.meta_out import *
 import gc
 import inspect
 
@@ -22,7 +23,7 @@ class MetaNode(Node):
             self.should_render_node = True
 
         super().__init__(parent_meta_node, serialized_state)
-        self.default_executor='outside_call'
+        self.default_executor_name='outside_call'
 
 
     def initialize_values(self):    #TODO: Separate initialize_values from render
@@ -93,7 +94,7 @@ class MetaNode(Node):
         return None
     
 
-    def get_code(self, value_executor, result_prefix='', indent=''):
+    def get_code(self, value_executor, result_prefix='', indent='', code_uuid=''):
         code = ''
         imports_code = ''
         functions_code = 'def '+self.get_name()+'('
@@ -113,7 +114,7 @@ class MetaNode(Node):
 
         for input in self.get_all_inputs():
             param = input.get_name()
-            input_code = self._get_input_code(param, self.get_name()+'_'+str(param) + ' = ')
+            input_code = self._get_input_code(param, self.get_name()+'_'+str(param) + ' = ', code_uuid=code_uuid)
             imports_code += input_code['imports_code']
             functions_code += input_code['functions_code'] + '\n'
             code += input_code['code'] + '\n'
@@ -140,7 +141,7 @@ class MetaNode(Node):
 
         out_nodes = self.get_meta_out_nodes()
         for n in out_nodes:
-            all_code = n.get_code('bypass', result_prefix='return ', indent='    ')
+            all_code = n.get_code('bypass', result_prefix='return ', indent='    ', code_uuid=code_uuid)
             functions_code += all_code['code']
             imports_code += all_code['imports_code']
             functions_code += all_code['functions_code']
