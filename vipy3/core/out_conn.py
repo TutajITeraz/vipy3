@@ -67,11 +67,17 @@ class OutConn():
 
         if code_uuid == self.last_code_uuid:
             print('FUNCTION CALLED TWICE '+self.get_name()+' uuid: '+code_uuid)
-            return {'imports_code': '', 'functions_code': '', 'code': indent + result_prefix + result_variable_name }
+            code = '\n'
+            if result_prefix != '':
+                code = indent + result_prefix + result_variable_name + '\n'
+
+            return {'imports_code': '', 'functions_code': '', 'code': code }
         self.last_code_uuid = code_uuid
 
         node_code = self.parent_node.get_code(self.value_executor, (result_variable_name+' = '), indent=indent, code_uuid=code_uuid)
-        node_code['code'] += indent + result_prefix + result_variable_name
+        #renaming
+        if result_prefix != '':
+            node_code['code'] += indent + result_prefix + result_variable_name+'\n'
         return node_code
 
     def get_name(self):

@@ -9,6 +9,7 @@ class ViShowText(Node):
 
     def initialize_values(self):
         self.inputs = [ InConn(self,'str_or_val',1,None) ]
+        self.outputs = [ OutConn(self,'bypass', 'default_executor', type='string') ]
         self.visualizers = {'show_text': ViTextVisualizer(self,'value', label='Show Text')}
 
     #EXECUTOR CODE BEGIN#

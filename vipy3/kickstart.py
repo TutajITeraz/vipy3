@@ -14,6 +14,9 @@ dpg.set_viewport_pos([1,1])
 WORKSPACE = Workspace()
 nodes_available = {'math':
                        {'add': ViAdd},
+                   'text':
+                       {'split': ViStringSplit,
+                        'concatenate': ViStringConcat},
                    'flow':
                        {'for': ViFor, 'if': ViIf},
                    'meta':
