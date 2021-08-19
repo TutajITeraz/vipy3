@@ -27,7 +27,9 @@ nodes_available = {'math':
                        {'loading_data':
                             {'load_mnist': ViLoadDatasetMNIST, 'load_cifar10': ViLoadDatasetCIFAR10},
                         'processing_data':
-                            {'random_sampler': ViRandomSampler}
+                            {'random_sampler': ViRandomSampler},
+                        'transforms':
+                            {'transform_to_tensor': ViTransformToTensor}
                         }
                    }
 WORKSPACE.add_nodes_available(nodes_available)

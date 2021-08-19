@@ -264,6 +264,9 @@ class Node:
 
     def get_input_value(self, input_name):
         input = self.get_input_by_name(input_name)
+        if input is None:
+            LOG.log('error','Could not get input named:'+input_name)
+            return None
         return input.get_value()
 
     def is_fresh(self):
