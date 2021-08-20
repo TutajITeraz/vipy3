@@ -36,15 +36,10 @@ class Node:
         if hasattr(self,'parent_meta_node') and self.parent_meta_node and self.should_render_node:
             self.dpg_render_node()
 
-
-        print('DEBUG _get_executor_function_text DEBUG')
-        print(str(self._get_executor_function_text()))
-        print('END DEBUG _get_executor_function_text DEBUG END')
-
     def _get_self_filepath(self):
         return os.path.abspath(sys.modules[self.__class__.__module__].__file__)
 
-    def _get_executor_function_text(self):
+    def _get_executor_function_text(self, value_executor):
         code = ''
         imports_code = ''
         functions_code = ''
@@ -52,6 +47,7 @@ class Node:
         imports_started = False
 
         code_started = False
+        executor_code_started = False
 
         f = open(self._get_self_filepath(), "r")
         for line in f:
@@ -73,7 +69,16 @@ class Node:
                 break
 
             if code_started:
-                code += line[4:]
+
+                if executor_code_started:
+                    if 'def' in line:
+                        break
+                    else:
+                         code += line[4:]
+
+                #executor_code_started = False and:
+                elif ('def '+value_executor) in line:
+                    executor_code_started = True
 
             if imports_started:
                 imports_code += line
@@ -126,7 +131,7 @@ class Node:
         rel_path = "../simple_nodes/"
         abs_file_path = os.path.join(script_dir, rel_path)
 
-        executor_code = self._get_executor_function_text()
+        executor_code = self._get_executor_function_text(value_executor)
         imports_code = executor_code['imports_code']
 
         if value_executor != 'bypass':
@@ -139,6 +144,7 @@ class Node:
                         line = line[4:]
 
                     if 'self.get_exe_result(' in line:
+                        code += "#code from inner call start\n"
                         result_line = line.split("self.get_exe_result(")[1]
                         result_line = result_line.split(")")[0]
 
@@ -150,7 +156,11 @@ class Node:
                         output = self.get_output_by_name(result_line)
                         result_code = output.get_code(result_prefix='', indent='', code_uuid=code_uuid)
 
-                        code += result_code['code']
+
+                        code += result_code['code']+'\n'
+
+                        code += "#code from inner call end\n"
+
                         continue
 
                     line = line.replace('self.',self.get_name()+'_')
@@ -254,6 +264,9 @@ class Node:
 
     def get_input_value(self, input_name):
         input = self.get_input_by_name(input_name)
+        if input is None:
+            LOG.log('error','Could not get input named:'+input_name)
+            return None
         return input.get_value()
 
     def is_fresh(self):

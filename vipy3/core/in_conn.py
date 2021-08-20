@@ -96,7 +96,16 @@ class InConn():
             print('connected_out = '+str(connected_out))
             return connected_out.get_code(result_prefix, indent=indent, code_uuid=code_uuid)
         elif hasattr(self,'dpg_input_id') and self.dpg_input_id:
-            return {'imports_code': '', 'functions_code': '', 'code': indent+result_prefix + str(dpg.get_value(self.dpg_input_id))}
+            value = dpg.get_value(self.dpg_input_id)
+
+            if isinstance(value, str):
+                value = "'"+value+"'"
+            else:
+                value = str(value)
+
+            code = indent+result_prefix + value
+
+            return {'imports_code': '', 'functions_code': '', 'code': code}
         return ''
 
     def set_value(self, value):
@@ -240,4 +249,19 @@ class InConnPercent(InConn):
         parent_node_id = self.parent_node.get_dpg_node_id()
         self.dpg_attribute_id = dpg.add_node_attribute(parent=parent_node_id, user_data=weakref.proxy(self))
         self.dpg_input_id = dpg.add_slider_float(label=self.get_label(), default_value=self.get_value(False), width=75, parent=self.dpg_attribute_id, max_value=1.0, min_value=0.0, callback=lambda a,b,c: self.dpg_val_change_callback(a,b,c) )
+        self.dpg_text_id = dpg.add_text(self.get_label(), parent=self.dpg_attribute_id,show=False)
+
+
+
+class InConnStr(InConn):
+    def __init__(self,parent_node,name='',default_value=None,serialized_state=None,label=''):
+        type = 'string'
+
+        super().__init__(parent_node,name,default_value,serialized_state,type,label)
+
+    def dpg_render(self):
+        print('dpg_render in conn int value:'+str(self.value))
+        parent_node_id = self.parent_node.get_dpg_node_id()
+        self.dpg_attribute_id = dpg.add_node_attribute(parent=parent_node_id, user_data=weakref.proxy(self))
+        self.dpg_input_id = dpg.add_input_text(label=self.get_label(), default_value=self.get_value(False), width=75, parent=self.dpg_attribute_id, callback=lambda a,b,c: self.dpg_val_change_callback(a,b,c) )
         self.dpg_text_id = dpg.add_text(self.get_label(), parent=self.dpg_attribute_id,show=False)
