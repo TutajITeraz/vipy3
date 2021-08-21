@@ -210,14 +210,14 @@ class Node:
             exe_func_name=self.default_executor_name
 
         if self.is_fresh() and exe_func_name in self.exe_cache:
-            print(self.get_name()+' node is fresh and returning cached value:'+str(self.exe_cache[exe_func_name]))
+            #print(self.get_name()+' node is fresh and returning cached value:'+str(self.exe_cache[exe_func_name]))
             self.set_stage(3)
             return self.exe_cache[exe_func_name]
 
         func_to_call = getattr(self,exe_func_name)
         params=inspect.signature(func_to_call).parameters
 
-        print('try to gather function params:'+str(params))
+        print('try to gather function params:'+str(params)+' of func name: '+exe_func_name)
         self.set_stage(1)
 
         args = []
@@ -229,15 +229,18 @@ class Node:
         #print('args '+str(args))
 
         #Visualizers:
-        if exe_func_name in self.visualizers:
-            visualizer = self.visualizers[exe_func_name]
+        print(self.get_name()+' node visualizers: '+str(self.visualizers))
+        for v in self.visualizers:
+            print('VISUALIZE:'+ v)
+
+            visualizer = self.visualizers[v]
             visualizer.update(*args)
 
         self.set_stage(2)
         self.exe_cache[exe_func_name] = func_to_call(*args)
         self.set_stage(3)
 
-        print(self.get_name() + ' node is not fresh, so calculated value is:' + str(self.exe_cache[exe_func_name]))
+        #print(self.get_name() + ' node is not fresh, so calculated value is:' + str(self.exe_cache[exe_func_name]))
 
 
         self.set_fresh(True)

@@ -196,9 +196,9 @@ class MetaNode(Node):
         self.nodes[new_node.get_uuid()] = new_node
 
     def get_node_by_uuid(self,uuid):
-        print('get_node_by uuuid all nodes uuids:')
-        for n in self.nodes:
-            print(n)
+        #print('get_node_by uuuid all nodes uuids:')
+        #for n in self.nodes:
+        #    print(n)
 
         node = None
         if uuid in self.nodes:
@@ -384,7 +384,7 @@ class MetaNode(Node):
         links = status['links']
 
         for link in links:
-            print('deserialize link:', str(link))
+            #print('deserialize link:', str(link))
 
             link_from_node = self.get_node_by_uuid(link['from_node_uuid'])
             link_to_node = self.get_node_by_uuid(link['to_node_uuid'])
@@ -394,8 +394,8 @@ class MetaNode(Node):
 
             link_to_attr.set_connected_node_out(link_from_attr)
 
-            print('link_from_attr :'+str(link_from_attr))
-            print('link_to_attr :'+str(link_to_attr))
+            #print('link_from_attr :'+str(link_from_attr))
+            #print('link_to_attr :'+str(link_to_attr))
 
             link_from_dpg_id = link_from_attr.get_dpg_attribute_id()
             link_to_dpg_id = link_to_attr.get_dpg_attribute_id()

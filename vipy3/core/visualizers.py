@@ -85,3 +85,46 @@ class ViTextVisualizer(ViVisualizer):
         print('update visualizer val:'+str(str_or_val))
         self.value = str_or_val
         dpg.set_value(self.dpg_text_id, str(str_or_val))
+
+
+class ViImgVisualizer(ViVisualizer):
+    def __init__(self,parent_node, name='', serialized_state=None, label=''):
+        super().__init__(parent_node, name, serialized_state, label)
+
+    def dpg_render(self):
+        print('render visualizer: '+self.get_name())
+
+        parent_node_id = self.parent_node.get_dpg_node_id()
+        self.dpg_attribute_id = dpg.add_node_attribute(label=self.get_label(), parent=parent_node_id, user_data=weakref.proxy(self), attribute_type=dpg.mvNode_Attr_Static)
+        self.dpg_img_id = dpg.add_text(self.get_label(), parent=self.dpg_attribute_id)
+
+    def update(self, str_or_val):
+        print('update visualizer val:'+str(str_or_val))
+        self.value = str_or_val
+        dpg.set_value(self.dpg_text_id, str(str_or_val))
+
+def _create_dynamic_textures():
+    ## create dynamic textures
+    texture_data1 = []
+    for i in range(0, 100*100):
+        texture_data1.append(255/255)
+        texture_data1.append(0)
+        texture_data1.append(255/255)
+        texture_data1.append(255/255)
+
+    dpg.add_dynamic_texture(100, 100, texture_data1, parent=demo_texture_container, id=demo_dynamic_texture_1)
+
+def _update_dynamic_textures(sender, app_data, user_data):
+    new_color[0] = 0.1
+    new_color[1] = 0.2
+    new_color[2] = 0.3
+    new_color[3] = 0.4
+
+    texture_data = []
+    for i in range(0, 100*100):
+        texture_data.append(new_color[0])
+        texture_data.append(new_color[1])
+        texture_data.append(new_color[2])
+        texture_data.append(new_color[3])
+
+    dpg.set_value(demo_dynamic_texture_1, texture_data)
