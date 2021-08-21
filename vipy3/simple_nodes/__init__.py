@@ -6,3 +6,4 @@ from .vistring_concat import ViStringConcat
 from .show_text import ViShowText
 from .meta_in import ViMetaIn
 from .meta_out import ViMetaOut
+from .show_img import ViShowImg

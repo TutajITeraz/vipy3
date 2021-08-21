@@ -25,9 +25,9 @@ nodes_available = {'math':
                        {'show text': ViShowText},
                    'pytorch':
                        {'loading_data':
-                            {'load_mnist': ViLoadDatasetMNIST, 'load_cifar10': ViLoadDatasetCIFAR10},
+                            {'load_mnist': ViLoadDatasetMNIST, 'load_cifar10': ViLoadDatasetCIFAR10, 'data_loader': ViDataLoader},
                         'processing_data':
-                            {'random_sampler': ViRandomSampler},
+                            {'random sampler': ViRandomSampler, 'data iter': ViDataIter},
                         'transforms':
                             {'transform_to_tensor': ViTransformToTensor}
                         }
