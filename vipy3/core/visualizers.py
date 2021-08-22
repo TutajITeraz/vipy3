@@ -3,6 +3,7 @@ import sys
 from . import *
 import weakref
 import vipy3.core.helpers
+import numpy as np
 
 class ViVisualizer():
     def __init__(self, parent_node, name, serialized_state=None, label=''):
@@ -86,45 +87,101 @@ class ViTextVisualizer(ViVisualizer):
         self.value = str_or_val
         dpg.set_value(self.dpg_text_id, str(str_or_val))
 
+DPG_VISUALIZERS_TEXTURES_CONTAINER = dpg.add_texture_registry(label="Visualizers textures container")
+
 
 class ViImgVisualizer(ViVisualizer):
-    def __init__(self,parent_node, name='', serialized_state=None, label=''):
+    def __init__(self,parent_node, name='', serialized_state=None, label='', width=100, height=100):
         super().__init__(parent_node, name, serialized_state, label)
+        self.width = width
+        self.height = height
 
     def dpg_render(self):
         print('render visualizer: '+self.get_name())
 
         parent_node_id = self.parent_node.get_dpg_node_id()
         self.dpg_attribute_id = dpg.add_node_attribute(label=self.get_label(), parent=parent_node_id, user_data=weakref.proxy(self), attribute_type=dpg.mvNode_Attr_Static)
-        self.dpg_img_id = dpg.add_text(self.get_label(), parent=self.dpg_attribute_id)
+        self.dpg_texture_id = self._create_dynamic_texture()
+        self.dpg_img_id = dpg.add_image(self.dpg_texture_id, width=self.width, height=self.height, parent=self.dpg_attribute_id)
 
-    def update(self, str_or_val):
-        print('update visualizer val:'+str(str_or_val))
-        self.value = str_or_val
-        dpg.set_value(self.dpg_text_id, str(str_or_val))
+    def update(self, value):
+        print('update visualizer val:'+str(value))
+        self.value = value
 
-def _create_dynamic_textures():
-    ## create dynamic textures
-    texture_data1 = []
-    for i in range(0, 100*100):
-        texture_data1.append(255/255)
-        texture_data1.append(0)
-        texture_data1.append(255/255)
-        texture_data1.append(255/255)
+        def tensor_to_np(tensor):
+            img = tensor.mul(255).byte()
+            # img = img.cpu().numpy().squeeze(0).transpose((1, 2, 0))
+            img = img.cpu().numpy()
+            return img
 
-    dpg.add_dynamic_texture(100, 100, texture_data1, parent=demo_texture_container, id=demo_dynamic_texture_1)
+        imgdata = tensor_to_np(value)
 
-def _update_dynamic_textures(sender, app_data, user_data):
-    new_color[0] = 0.1
-    new_color[1] = 0.2
-    new_color[2] = 0.3
-    new_color[3] = 0.4
+        channelsNo = len(imgdata)
+        imagesHeight = len(imgdata[0])
+        imagesWidth = len(imgdata[0][0])
 
-    texture_data = []
-    for i in range(0, 100*100):
-        texture_data.append(new_color[0])
-        texture_data.append(new_color[1])
-        texture_data.append(new_color[2])
-        texture_data.append(new_color[3])
+        if self.width != imagesWidth or self.height != imagesHeight:
+            self.width = imagesWidth
+            self.height = imagesHeight
 
-    dpg.set_value(demo_dynamic_texture_1, texture_data)
+            dpg.delete_item(self.dpg_texture_id)
+            dpg.delete_item(self.dpg_img_id)
+
+            self.dpg_texture_id = dpg.generate_uuid()
+            dpg.add_dynamic_texture(self.width, self.height, self.texture_data,
+                                    parent=DPG_VISUALIZERS_TEXTURES_CONTAINER, id=self.dpg_texture_id)
+
+            self.dpg_img_id = dpg.add_image(self.dpg_texture_id, width=self.width, height=self.height,
+                                            parent=self.dpg_attribute_id)
+
+        print("IMG DATA CHANNELS "+ str(channelsNo))
+        print("IMG DATA imagesHeight "+ str(imagesHeight))
+        print("IMG DATA imagesWidth "+ str(imagesWidth))
+
+        #update self.dpg_img_id
+
+        dpg.set_item_width(self.dpg_img_id, imagesWidth)
+        dpg.set_item_height(self.dpg_img_id, imagesHeight)
+
+        self.width = imagesWidth
+        self.height = imagesHeight
+
+        if channelsNo == 1:
+            imgdata = np.stack((imgdata,) * 4, axis=-1)  # for grayscale
+
+            for x in range(imagesWidth):
+                for y in range(imagesHeight):
+                    imgdata[0][x][y][3] = 1.0 #alpha channel
+
+        elif channelsNo==3:
+            rgbimg = []
+            rdata = imgdata[0]
+            gdata = imgdata[1]
+            bdata = imgdata[2]
+            for x in range(imagesWidth):
+                for y in range(imagesHeight):
+                    rgbimg.append(rdata[x][y])
+                    rgbimg.append(gdata[x][y])
+                    rgbimg.append(bdata[x][y])
+                    rgbimg.append(0.0)
+            imgdata = rgbimg
+
+        print("Result imgdata len "+str(len(imgdata)))
+
+        self.texture_data = imgdata
+
+        dpg.set_value(self.dpg_texture_id, self.texture_data)
+
+    def _create_dynamic_texture(self):
+        ## create dynamic textures
+        self.texture_data = []
+        for i in range(0, 100*100):
+            self.texture_data.append(255/255)
+            self.texture_data.append(0)
+            self.texture_data.append(255/255)
+            self.texture_data.append(255/255)
+
+        self.dpg_texture_id = dpg.generate_uuid()
+        dpg.add_dynamic_texture(self.width, self.height, self.texture_data, parent=DPG_VISUALIZERS_TEXTURES_CONTAINER, id=self.dpg_texture_id)
+
+        return self.dpg_texture_id
