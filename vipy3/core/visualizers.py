@@ -109,9 +109,9 @@ class ViImgVisualizer(ViVisualizer):
         self.value = value
 
         def tensor_to_np(tensor):
-            img = tensor.mul(255).byte()
+            #img = tensor.mul(255).byte()
             # img = img.cpu().numpy().squeeze(0).transpose((1, 2, 0))
-            img = img.cpu().numpy()
+            img = tensor.cpu().numpy()
             return img
 
         imgdata = tensor_to_np(value)
@@ -151,7 +151,9 @@ class ViImgVisualizer(ViVisualizer):
 
             for x in range(imagesWidth):
                 for y in range(imagesHeight):
+                    print(str(imgdata[0][x][y][0])+' ', end='')
                     imgdata[0][x][y][3] = 1.0 #alpha channel
+                print('')
 
         elif channelsNo==3:
             rgbimg = []
