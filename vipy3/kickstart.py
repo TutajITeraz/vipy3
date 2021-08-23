@@ -22,7 +22,8 @@ nodes_available = {'math':
                    'meta':
                        {'meta_node': MetaNode, 'input': ViMetaIn, 'output': ViMetaOut},
                    'visualize':
-                       {'show text': ViShowText},
+                       {'show text': ViShowText,
+                        'show_image': ViShowImg},
                    'pytorch':
                        {'loading_data':
                             {'load_mnist': ViLoadDatasetMNIST, 'load_cifar10': ViLoadDatasetCIFAR10, 'data_loader': ViDataLoader},

@@ -401,8 +401,8 @@ class Node:
         dpg_node_attr_id = dpg.get_item_parent(sender)
         dpg_node_id = dpg.get_item_parent(dpg_node_attr_id)
 
-        dpg_conf = dpg.get_item_configuration(dpg_node_id)
-        print(str(dpg_conf))
+        node_conf = dpg.get_item_configuration(dpg_node_id)
+        print(str(node_conf))
 
         #dpg_attrs = dpg.get_item_children(dpg_node_id)
         #print(str(dpg_attrs))

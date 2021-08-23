@@ -13,7 +13,8 @@ import torch.nn.functional as F
 
 from os.path import expanduser
 
-import collections
+import collecticollectiimportcollectiimportcollectiimportimport collections
+
 try:
     from collections import OrderedDict
 except ImportError:
