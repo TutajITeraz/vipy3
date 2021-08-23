@@ -29,7 +29,14 @@ nodes_available = {'math':
                         'processing_data':
                             {'random sampler': ViRandomSampler, 'data iter': ViDataIter},
                         'transforms':
-                            {'transform_to_tensor': ViTransformToTensor}
+                            {'transform_to_tensor': ViTransformToTensor},
+                        'building net':
+                            {'linear': ViLinear,
+                             'ReLU': ViReLU,
+                             'Softmax': ViLogSoftmax,
+                             'Net from seq': ViNetFromSeq,
+                             'Optimizer': ViOptimizer,
+                             'Cross Entropy Loss': ViCrossEntropyLoss}
                         }
                    }
 WORKSPACE.add_nodes_available(nodes_available)

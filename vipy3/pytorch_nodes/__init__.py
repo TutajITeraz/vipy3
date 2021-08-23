@@ -4,3 +4,9 @@ from .random_sampler import ViRandomSampler
 from .transform_to_tensor import ViTransformToTensor
 from .data_iter import ViDataIter
 from .data_loader import ViDataLoader
+from .linear import ViLinear
+from .relu import ViReLU
+from .log_softmax import ViLogSoftmax
+from .net_from_seq import ViNetFromSeq
+from .cross_entropy_loss import ViCrossEntropyLoss
+from .optimizer import ViOptimizer
