@@ -5,6 +5,7 @@ TODO
 ====
 Work In Progress:
 -----------------
+* FOR pass args to exe function, get iter, get last element
 * reimplement pytorch nodes
 * more input types
 

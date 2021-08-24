@@ -10,3 +10,4 @@ from .log_softmax import ViLogSoftmax
 from .net_from_seq import ViNetFromSeq
 from .cross_entropy_loss import ViCrossEntropyLoss
 from .optimizer import ViOptimizer
+from .net_trainer import ViNetTrainer

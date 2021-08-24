@@ -37,7 +37,10 @@ nodes_available = {'math':
                              'Softmax': ViLogSoftmax,
                              'Net from seq': ViNetFromSeq,
                              'Optimizer': ViOptimizer,
-                             'Cross Entropy Loss': ViCrossEntropyLoss}
+                             'Cross Entropy Loss': ViCrossEntropyLoss},
+                        'training':
+                            {'net_trainer': ViNetTrainer
+                            }
                         }
                    }
 WORKSPACE.add_nodes_available(nodes_available)
