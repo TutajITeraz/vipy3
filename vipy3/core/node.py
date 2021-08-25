@@ -228,6 +228,8 @@ class Node:
             #print('get '+str(param))
             value = self.get_input_value(param)
             args[param] = value
+
+            print('                param "'+param+'" has value "'+str(value)+'"')
         
         #print('args '+str(args))
 
