@@ -20,7 +20,7 @@ class ViNetTrainer(ViFor):
         for self.iterator in range(how_many):
             data = self.get_input_value('data')
 
-            self.last_result = self.for_exe(kwargs)
+            self.last_result = self.for_exe(**kwargs)
 
             result_list.append(self.last_result)
         return result_list

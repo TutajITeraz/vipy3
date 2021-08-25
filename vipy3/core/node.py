@@ -220,11 +220,11 @@ class Node:
         print('try to gather function params:'+str(params)+' of func name: '+exe_func_name)
         self.set_stage(1)
 
-        args = []
+        args = {}
         for param in params:
             #print('get '+str(param))
             value = self.get_input_value(param)
-            args.append(value)
+            args[param] = value
         
         #print('args '+str(args))
 
@@ -234,10 +234,10 @@ class Node:
             print('VISUALIZE:'+ v)
 
             visualizer = self.visualizers[v]
-            visualizer.update(*args)
+            visualizer.update(**args)
 
         self.set_stage(2)
-        self.exe_cache[exe_func_name] = func_to_call(*args)
+        self.exe_cache[exe_func_name] = func_to_call(**args)
         self.set_stage(3)
 
         #print(self.get_name() + ' node is not fresh, so calculated value is:' + str(self.exe_cache[exe_func_name]))
