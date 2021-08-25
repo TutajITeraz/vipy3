@@ -8,6 +8,8 @@ Work In Progress:
 * FOR pass args to exe function, get iter, get last element
 * reimplement pytorch nodes
 * more input types
+* FOR2 gen code
+* FOR2 get all args
 
 High (engine) priority:
 -----------------------

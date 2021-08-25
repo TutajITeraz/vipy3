@@ -1,5 +1,6 @@
 from .add import ViAdd
 from .vifor import ViFor
+from .vifor2 import ViFor2
 from .viif import ViIf
 from .vistring_split import ViStringSplit
 from .vistring_concat import ViStringConcat

@@ -18,7 +18,7 @@ nodes_available = {'math':
                        {'split': ViStringSplit,
                         'concatenate': ViStringConcat},
                    'flow':
-                       {'for': ViFor, 'if': ViIf},
+                       {'for': ViFor, 'for2': ViFor2, 'if': ViIf},
                    'meta':
                        {'meta_node': MetaNode, 'input': ViMetaIn, 'output': ViMetaOut},
                    'visualize':

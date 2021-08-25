@@ -205,6 +205,9 @@ class Node:
         print('default_executor_name: ', self.default_executor_name)
         print(str(self.get_exe_result(self.default_executor_name)))
 
+    def _get_func_params(self,func_to_call):
+        return inspect.signature(func_to_call).parameters
+
     def get_exe_result(self,exe_func_name=''):
         if exe_func_name == '':
             exe_func_name=self.default_executor_name
@@ -215,7 +218,7 @@ class Node:
             return self.exe_cache[exe_func_name]
 
         func_to_call = getattr(self,exe_func_name)
-        params=inspect.signature(func_to_call).parameters
+        params = self._get_func_params(func_to_call)
 
         print('try to gather function params:'+str(params)+' of func name: '+exe_func_name)
         self.set_stage(1)
