@@ -1,7 +1,12 @@
 import dearpygui.dearpygui as dpg
 
+dpg.start_dearpygui()
+dpg.destroy_context()
+
+
 dpg.create_context()
-dpg.create_viewport()
+dpg.create_viewport(title="dearPyGui Window", width=1600, height=900)
+
 dpg.setup_dearpygui()
 dpg.show_viewport()
 

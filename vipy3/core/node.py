@@ -9,11 +9,19 @@ from importlib import import_module
 
 
 class Node:
+    node_counter = {}
+
     def __init__(self, parent_meta_node=None, serialized_state=None):
         if parent_meta_node:
             self.parent_meta_node = weakref.proxy(parent_meta_node)
         self.uuid = gen_uuid()
-        self.name = self.get_class_name()
+
+        if self.get_class_name() in Node.node_counter:
+            Node.node_counter[self.get_class_name()] += 1
+        else:
+            Node.node_counter[self.get_class_name()] = 0
+
+        self.name = self.get_class_name() + str(Node.node_counter[self.get_class_name()])
         self.default_executor_name = 'default_executor'
 
         self.inputs = []
@@ -307,14 +315,16 @@ class Node:
     def set_stage(self, stage):
         self.stage = stage
 
-        if self.dpg_node_id and stage == 1:
-            dpg.set_item_theme(self.dpg_node_id, WAITING_NODE_THEME)
+        # TODO DPG 1.1.1 FIX
 
-        elif self.dpg_node_id and stage == 2:
-            dpg.set_item_theme(self.dpg_node_id, CALCULATING_NODE_THEME)
+        #if self.dpg_node_id and stage == 1:
+        #    dpg.set_item_theme(self.dpg_node_id, WAITING_NODE_THEME)
 
-        elif self.dpg_node_id and stage == 3:
-            dpg.set_item_theme(self.dpg_node_id, DONE_NODE_THEME)
+        #elif self.dpg_node_id and stage == 2:
+        #    dpg.set_item_theme(self.dpg_node_id, CALCULATING_NODE_THEME)
+
+        #elif self.dpg_node_id and stage == 3:
+        #    dpg.set_item_theme(self.dpg_node_id, DONE_NODE_THEME)
 
         LOG.log(self.get_name() + "\t changed stage to: " + str(stage))
 

@@ -64,7 +64,7 @@ nodes_available = {'math':
 WORKSPACE.add_nodes_available(nodes_available)
 
 DPG_PRIMARY_WINDOW_ID = dpg.add_window(
-    label="vipy3", width=800, height=800, pos=(100, 100))
+    label="vipy3", pos=(100, 100))
 dpg_menu_bar_id = dpg.add_menu_bar(
     label='Workspace menu bar', parent=DPG_PRIMARY_WINDOW_ID)
 dpg_workspace_menu_id = dpg.add_menu(label='Workspace', parent=dpg_menu_bar_id)
