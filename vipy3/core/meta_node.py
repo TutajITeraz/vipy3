@@ -287,8 +287,9 @@ class MetaNode(Node):
         # dpg.add_menu_item(label='Add some node',
         #                  parent=self.dpg_right_click_menu_id)
 
-        dpg.add_item_clicked_handler(0, callback=lambda s, a, u: print(
-            f"clicked_handler: {s} '\t' {a} '\t' {u}"), parent=self.dpg_node_editor_id)
+        #TODO port to new version
+        #dpg.add_item_clicked_handler(0, callback=lambda s, a, u: print(
+        #    f"clicked_handler: {s} '\t' {a} '\t' {u}"), parent=self.dpg_node_editor_id)
 
         self.dpg_is_rendered = True
 
