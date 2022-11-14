@@ -13,9 +13,12 @@ Visual Python programming tool that supports pytorch, based on node editor provi
 
 ### Example: Simple addition and code generation:
 
-sneak_peak_simple_add.gif
 ![Addition example](README_img/sneak_peak_simple_add.gif?raw=true "Example 1")
 
+
+### Example: Training and evaluating network using pytorch:
+
+![PyTorch example](README_img/vipy_ai.webp?raw=true "Example 2")
 
 
 TODO
