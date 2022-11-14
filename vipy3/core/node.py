@@ -494,7 +494,9 @@ class Node:
             dpg.add_separator()
             dpg.add_button(label="OK", width=75, callback=lambda: [self.set_name(dpg.get_value(
                 self.dpg_new_name_input_id)), dpg.configure_item(modal_id, show=False)])
-            dpg.add_same_line()
+
+            #TODO port to new version
+            #dpg.add_same_line()#maybe group(horizontal=True)
             dpg.add_button(label="Cancel", width=75, callback=lambda: dpg.configure_item(
                 modal_id, show=False))
 

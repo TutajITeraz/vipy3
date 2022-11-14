@@ -1,6 +1,23 @@
 # vipy3
 Visual Python programming tool that supports pytorch, based on node editor provided by dear pygui
 
+## Requirements
+```
+    python -m pip install -r requirements.txt
+```
+
+## Using 
+```
+    python -m vipy3.kickstart
+```
+
+### Example: Simple addition and code generation:
+
+sneak_peak_simple_add.gif
+![Addition example](README_img/sneak_peak_simple_add.gif?raw=true "Example 1")
+
+
+
 TODO
 ====
 Work In Progress:
